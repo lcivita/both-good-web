@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOTH GOOD</title>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barrio&display=swap" rel="stylesheet">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const backImage = document.querySelector('.image.back img');
+            const frontImage = document.querySelector('.image.front img');
+
+            frontImage.addEventListener('mouseenter', () => {
+                frontImage.style.transform = 'scale(1.1)';
+                backImage.style.transform = 'scale(1.05)';
+            });
+
+            frontImage.addEventListener('mouseleave', () => {
+                frontImage.style.transform = 'scale(1)';
+                backImage.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+         <a href="index.html"><img src="imgs/BG logo.png" style="width: 250px;"></img></a>
+    </header>
+    <div class="container">
+        <main>
+            <div class="about">
+                <h1>About</h1>
+                <p>Both Good is an indie game development studio based in Brooklyn, NY.</p>
+            </div>
+            <br>
+            <br>
+            <p>-----------</p>
+            <br>
+            <br>
+            <h1>Games</h1>
+            <br>
+            <div class="image-stack" style="display: flex; justify-content: center; align-items: center;">
+                <div class="image back">
+                    <a href=http://store.steampowered.com/app/3316660/Goo_Goo_Grapplers?utm_source=BGwebsite&utm_medium=gamethumbnail>
+                        <img src="imgs/GGG_Bot.png" alt="Back Image">
+                    </a>
+                </div>
+                <div class="image front">
+                    <a href=http://store.steampowered.com/app/3316660/Goo_Goo_Grapplers?utm_source=BGwebsite&utm_medium=gamethumbnail>
+                        <img src="imgs/GGG_Top.png" alt="Front Image">
+                    </a>
+                </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <p>-----------</p>
+            <br>
+            
+            <p>more coming very soon 👀</p>
+            
+            <div class="social-icons">
+                <a href="mailto:bothgood@bothgood.games">
+                    <img src="imgs/Mail_icon.png" alt="email">
+                    <span class="tooltip">email</span>
+                </a>
+                <a href="https://www.youtube.com/@BothGoodGames">
+                    <img src="imgs/YoutubeIcon.png" alt="YouTube">
+                    <span class="tooltip">youtube</span>
+                </a>
+                <a href="https://www.instagram.com/bothgoodgames/">
+                    <img src="imgs/igIgon.png" alt="YouTube">
+                    <span class="tooltip">instagram</span>
+                </a>
+                <a href="https://www.x.com/BothGoodGames">
+                    <img src="imgs/XIcon.png" alt="Twitter">
+                    <span class="tooltip">twitter</span>
+                </a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
