@@ -13,4 +13,5 @@ document.addEventListener('DOMContentLoaded', function() {
         frontImage.style.transform = 'scale(1)';
         backImage.style.transform = 'scale(1)';
     });
+
 });
