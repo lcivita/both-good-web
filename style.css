@@ -102,3 +102,24 @@ a:hover {
 .social-icons img:hover {
     transform: scale(1.1);
 }
+
+@keyframes jiggle {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(-1px); }
+    50% { transform: translateY(1px); }
+    75% { transform: translateY(-1px); }
+    100% { transform: translateY(0); }
+}
+
+.jiggly {
+    display: inline-block;
+    animation: jiggle 3s infinite ease-in-out;
+}
+
+.jiggly:nth-child(odd) {
+    animation-delay: 0.75s;
+}
+
+.jiggly:nth-child(even) {
+    animation-delay: 0.5s;
+}
