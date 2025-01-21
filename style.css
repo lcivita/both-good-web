@@ -1,3 +1,4 @@
+
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -5,7 +6,18 @@ body {
     background-color: black;
     padding: 20px;
     text-align: center;
+    
+    margin: 0;
+    animation: backgroundChange 2s infinite alternate;
+    background-image: url('imgs/starBg_0.jpg');
+    background-size: cover;
+    background-position: center;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges; 
+    image-rendering: -o-crisp-edges;
 }
+
 
 img {
     image-rendering: pixelated;
@@ -66,7 +78,17 @@ h1, h2 {
 
 
 .about {
+    
+    width: 85%;
+    margin: auto;
+}
+
+.about h1 {
     text-align: center;
+}
+
+.about p {
+    text-align: left;
 }
 
 a {
@@ -123,3 +145,5 @@ a:hover {
 .jiggly:nth-child(even) {
     animation-delay: 0.5s;
 }
+
+
