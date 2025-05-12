@@ -155,3 +155,52 @@ ul {
 .toc a:hover {
     color: orange;
 }
+
+.photo-section {
+  padding: 20px;
+  display: block; /* reset any flex stuff */
+}
+
+.photo-section h2 {
+  text-align: left;
+  margin-left: 20px; /* optional for a consistent left indent */
+}
+
+.photo-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* center the grid horizontally */
+  border: solid white 2px;
+  gap: 20px;
+  margin: 0 auto;
+  max-width: 800px;
+  width: 100%;
+}
+
+.photo-row.large {
+  display: flex;
+  justify-content: center;
+}
+
+.photo-row.large img {
+  width: 50%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.photo-row.small {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.photo-row.small img {
+  flex: 1 1 0;
+  max-width: 25%;
+  height: auto;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
