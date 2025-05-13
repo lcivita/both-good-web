@@ -4,37 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BOTH GOOD Press Kit</title>
-    <link rel="stylesheet" href="pressStyle.css" />
+    <link rel="stylesheet" href="../PressStyle.css" />
   </head>
   <body>
-    <header>
-      <!-- <a href="index.html"
-        ><img
-          src="imgs/BG logo.png"
-          style="width: 250px"
-          draggable="false"
-          alt="BOTH GOOD Logo"
-      /></a> -->
-    </header>
-
     <!-- Navigation -->
     <nav class="toc">
       <ul>
         <li><a href="#fact-sheet">Fact Sheet</a></li>
         <li><a href="#videos">Videos</a></li>
         <li><a href="#photos">Photos</a></li>
-        <li><a href="#videos">Logo</a></li>
-        <!-- Add more sections as needed -->
+        <li><a href="#logo">Logo</a></li>
       </ul>
     </nav>
 
+    <!-- Main Container -->
     <div class="container">
       <main>
-        <h1>Both Good Press Kit</h1>
-        <!-- PART 1: Description-->
-        <h2 id="fact-sheet"><b> Fact Sheet </b></h2>
+        <h1>Golf Boxing Press Kit</h1>
+        <!-- PART 1: Fact Sheet-->
+        <div class="section-header padding-20">
+          <h1 id="fact-sheet"><b> Fact Sheet </b></h1>
+        </div>
+
         <div class="flex-container">
-          <div class="column-1">
+          <div class="fact-sheet-col-1">
             <div class="box-1">
               <p><b>Developer</b></p>
               <a href="https://www.bothgood.games/"> Both Good </a>
@@ -67,7 +60,7 @@
               </ul>
             </div>
           </div>
-          <div class="column-2">
+          <div class="fact-sheet-col-2">
             <div>
               <h2><b> Description </b></h2>
               <p>
@@ -103,9 +96,12 @@
         <!-- PART 2: Videos -->
         <div class="flex-container column" id="videos">
           <!-- HEADER -->
-          <h2 class="padding"><b> Videos </b></h2>
+          <div class="section-header padding-20">
+            <h1 id="fact-sheet"><b> Videos </b></h1>
+          </div>
+
           <!-- VIDEO BOX -->
-          <div class="flex-container column padding">
+          <div class="flex-container column padding-20">
             <h3>
               <b>Video Title</b> -
               <a href="https://www.youtube.com/watch?v=UUvvFDp6hes">
@@ -124,8 +120,7 @@
             ></iframe>
           </div>
           <!-- VIDEO BOX -->
-          <!-- VIDEO BOX -->
-          <div class="flex-container column padding">
+          <div class="flex-container column padding-20">
             <h3>
               <b>Video Title</b> -
               <a href="https://www.youtube.com/watch?v=UUvvFDp6hes">
@@ -146,17 +141,19 @@
         </div>
 
         <!-- PART 3 Photos -->
-        <div class="flex-container column">
+        <div class="section-header padding-20">
+          <h1><b> Photos </b></h1>
+        </div>
+        <div class="flex-container column" id="photos">
           <div>
             <section class="photo-section">
-              <h2>Photos</h2>
               <div class="photo-grid">
                 <div class="photo-row large">
-                  <img src="imgs/BG logo.png" alt="Top group photo" />
+                  <img src="../imgs/BG logo.png" alt="Top group photo" />
                 </div>
                 <div class="photo-row small">
-                  <img src="imgs/BG logo.png" alt="Team photo 1" />
-                  <img src="imgs/BG logo.png" alt="Team photo 2" />
+                  <img src="../imgs/BG logo.png" alt="Team photo 1" />
+                  <img src="../imgs/BG logo.png" alt="Team photo 2" />
                 </div>
               </div>
             </section>
@@ -165,12 +162,24 @@
 
         <!-- PART 4: Logo -->
         <div class="flex-container column">
-          <h2>Logo & Icon</h2>
+          <div class="section-header padding-20">
+            <h1 id="logo"><b> Logo </b></h1>
+          </div>
+          <div class="photo-row large">
+            <img src="../imgs/BG logo.png" alt="Team photo 1" />
+          </div>
+          <a
+            href="../imgs/BG logo.png"
+            download="BothGood_Logo.png"
+            class="download-btn"
+          >
+            Download Logo (PNG)
+          </a>
         </div>
 
         <!-- PART 4: Awards -->
         <div class="flex-container column">
-          <h2>Awa</h2>
+          <h2>Awards</h2>
         </div>
 
         <!-- PART 4: Articles -->
@@ -181,16 +190,16 @@
 
         <div class="social-icons">
           <a href="mailto:bothgood@bothgood.games">
-            <img src="imgs/Mail_icon.png" alt="email" />
+            <img src="../imgs/Mail_icon.png" alt="email" />
           </a>
           <a href="https://www.youtube.com/@BothGoodGames">
-            <img src="imgs/YoutubeIcon.png" alt="YouTube" />
+            <img src="../imgs/YoutubeIcon.png" alt="YouTube" />
           </a>
           <a href="https://www.instagram.com/bothgoodgames/">
-            <img src="imgs/igIgon.png" alt="YouTube" />
+            <img src="../imgs/igIgon.png" alt="YouTube" />
           </a>
           <a href="https://www.x.com/BothGoodGames">
-            <img src="imgs/XIcon.png" alt="Twitter" />
+            <img src="../imgs/XIcon.png" alt="Twitter" />
           </a>
         </div>
       </main>
