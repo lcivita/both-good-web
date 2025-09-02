@@ -1,6 +1,6 @@
 {
-  "name": "BOTH GOOD",
-  "short_name": "BOTH GOOD",
+  "name": "MyWebSite",
+  "short_name": "MySite",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
