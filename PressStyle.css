@@ -191,7 +191,7 @@ ul {
 
 .photo-row.large {
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
 
 .photo-row.large img {
@@ -201,19 +201,27 @@ ul {
   border-radius: 8px;
 }
 
-.photo-row.small {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+.photo-row.small img {
+    flex: 1 1 0;
+    max-width: 25%;
+    height: auto;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
-.photo-row.small img {
-  flex: 1 1 0;
-  max-width: 25%;
-  height: auto;
-  border-radius: 8px;
-  box-sizing: border-box;
+/* Make super-wide art span the full row */
+.photo-row.small img.wide {
+    flex: 1 1 100%;
+    max-width: 100%;
+    height: auto;           /* preserve aspect */
+    object-fit: contain;    /* no crop */
+}
+.hero-image img, .footer-art img {
+    width: 50%;
+    max-width: 1200px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 12px; /* optional */
 }
 
 
