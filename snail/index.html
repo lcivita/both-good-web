@@ -4,32 +4,161 @@
     <meta charset="UTF-8" />
     <title>Snail Game – Both Good Games</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/snail/style.css" />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
   </head>
   <body>
     <header>
       <nav>
-        <a href="/">Home</a>
-        <a href="/snail/">Snail</a>
-        <!-- add other links as needed -->
+        <a href="../index.html"><img src="../imgs/BG logo.png" style="width: 70px;"></a>
+      
+        <div class="nav-links">
+          <a href="#leaderboards">Leaderboards</a>
+          <a href="#faq">FAQ</a>
+          <a href="#credits">Credits</a>
+        </div>
       </nav>
     </header>
 
     <main>
-      <h1>Snail 🐌</h1>
-      <p id="leaderboard-status">Loading leaderboard…</p>
-      <table id="leaderboard" style="display: none">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <section id="leaderboards">
+        <h2>Leaderboards</h2>
+        <div class="tabs" role="tablist" aria-label="Leaderboard tabs">
+          <button id="tab-top" class="tab active" role="tab" aria-selected="true">
+            ☠️ Cemetery
+          </button>
+          <button id="tab-bot" class="tab" role="tab" aria-selected="false">
+            🐌 Living
+          </button>
+        </div>
+      
+        <p id="leaderboard-status">Loading leaderboard…</p>
+      
+        <div id="leaderboard-controls" style="display:none; margin: 8px 0; gap: 8px; align-items:center;">
+          <button id="leaderboard-prev">Prev</button>
+          <span id="leaderboard-page-label"></span>
+          <button id="leaderboard-next">Next</button>
+        </div>
+      
+        <table id="leaderboard" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
 
+        <div class="steam-widget">
+          <iframe
+            src="https://store.steampowered.com/widget/4149320/"
+            frameborder="0"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </section>
+
+      <section id="faq" class="info">
+        <h2>FAQ</h2>
+      
+        <div class="faq">
+          <details class="faq-item">
+            <summary>Can I replay after I lose?</summary>
+            <div class="faq-body">
+              <p>
+                No. Once your snail dies, your run is over.
+              </p>
+            </div>
+          </details>
+        
+          <details class="faq-item">
+            <summary>How does playing on multiple devices work?</summary>
+            <div class="faq-body">
+              <p>
+                Your snail is tied to the device it was created on. Opening the game on a new device will start a brand-new snail, with the timer and currency reset to zero.
+              </p>
+              <p>
+                However, if your snail has already died on one device, opening the game on another device will immediately end that run as well.
+              </p>
+            </div>
+          </details>
+        </div>
+        
+          </details>
+        </div>
+      </section>
+      
+      <section id="credits" class="info">
+        <h2>Credits</h2>
+      
+        <div class="credits">
+          <div class="credits-card">
+            <p class="credits-title">Luca Jeha Civita</p>
+            <p class="credits-sub">
+              Lead Developer / Visual Art Director
+            </p>
+      
+            <ul class="credits-list">
+              <li><span class="label">Dev:</span> Frontend & Backend Development</li>
+              <li><span class="label">Content:</span> UI & Snail Visuals</li>
+              <li><span class="label">Marketing:</span> Trailer & Additional Content</li>
+            </ul>
+          </div>
+        
+          <div class="credits-card">
+            <p class="credits-title">Pedro Jeha Civita</p>
+            <p class="credits-sub">
+              Game Developer
+            </p>
+            <ul class="credits-list">
+              <li><span class="label">Dev:</span> Backend Development</li>
+            </ul>
+          </div>
+        
+          <div class="credits-card">
+            <p class="credits-title">Justin Cook</p>
+            <p class="credits-sub">
+              Game Designer / Operations
+            </p>
+            <ul class="credits-list">
+              <li><span class="label">Design:</span> Game Design & Ideation</li>
+              <li><span class="label">Marketing:</span> Marketing Content & Outreach</li>
+            </ul>
+          </div>
+        
+          <div class="credits-card">
+            <p class="credits-title">Ally Yanxiu Luo</p>
+            <p class="credits-sub">
+              Content
+            </p>
+            <ul class="credits-list">
+              <li><span class="label">Content:</span> Made a Skin :)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      
+      <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+      </script>
+    
       <script src="snail.js"></script>
+
     </main>
   </body>
 </html>

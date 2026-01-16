@@ -1,6 +1,6 @@
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Syne Mono", monospace;
     line-height: 1.6;
     color: white;
     background-color: black;
@@ -75,7 +75,6 @@ h1, h2 {
     left: 50%;
     transform: translateX(-50%);
 }
-
 
 .about {
     

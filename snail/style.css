@@ -1,0 +1,353 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Syne Mono", monospace;
+    color: #000;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background: none;
+  }
+  
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../imgs/snail_wallpaper.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+    transform: translateZ(0);
+  }
+  
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    /* background: rgba(0, 0, 0, 0.25); */
+    z-index: -1;
+  }
+  
+  
+  #leaderboards, #faq, #credits {
+    scroll-margin-top: 24px;
+  }
+  
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+  }
+  
+  header {
+    background: #000080;
+    border-bottom: 2px solid #000;
+  }
+  
+  nav {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  
+  nav img {
+    display: block;
+  }
+  
+  nav img:hover {
+    transform: scale(1.06);
+  }
+  
+  /* Toolbar-style nav links */
+  .nav-links {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .nav-links a {
+    background: #c0c0c0;
+    color: #000;
+    padding: 4px 10px;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font-weight: 700;
+  }
+  
+  .nav-links a:hover {
+    background: #d6d6d6;
+  }
+  
+  .nav-links a:active {
+    border-color: #404040 #ffffff #ffffff #404040;
+    padding-top: 5px;
+    padding-bottom: 3px;
+  }
+  
+  .nav-links a:focus-visible {
+    outline: 2px dotted #000;
+    outline-offset: 2px;
+  }
+
+
+  h2 {
+    display: inline-block;
+    margin: 24px 0 12px;
+    padding: 4px 10px;
+  
+    background: #c0c0c0;
+    color: #000;
+    font-weight: 700;
+  
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+  }
+  
+  p {
+    margin: 8px 0 12px;
+    color: #111;
+  }
+  
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin: 12px 0 12px;
+    border-bottom: none;
+  }
+  
+  .tab {
+    background: #000080;
+    color: #ffffff;
+    font-weight: 700;
+  
+    padding: 6px 12px;
+    margin-right: 4px;
+    cursor: pointer;
+  
+    border: 2px solid;
+    border-color: 
+      #9aa6ff
+      #404040
+      #404040
+      #9aa6ff;
+  
+    box-shadow:
+      inset 1px 1px 0 rgba(255,255,255,0.35),
+      inset -1px -1px 0 rgba(0,0,0,0.4);
+  }
+  
+  .tab:hover {
+    filter: brightness(1.08);
+  }
+  
+  
+  .tab.active {
+    background: #c0c0c0;
+    color: #000;
+    border: 2px solid #000;
+    box-shadow: none;
+  }
+  
+  #leaderboard-controls {
+    margin: 10px 0 12px;
+    padding: 8px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  button {
+    background: #c0c0c0;
+    color: #000;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    padding: 4px 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  button:hover:not(:disabled) {
+    background: #d6d6d6;
+  }
+  
+  button:active:not(:disabled) {
+    border-color: #404040 #ffffff #ffffff #404040;
+    padding-top: 5px;
+    padding-bottom: 3px;
+  }
+  
+  button:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    color: #000;
+    border: 2px solid #000;
+  }
+  
+  thead {
+    background: #000080;
+  }
+  
+  th {
+    color: #fff;
+    font-weight: 700;
+    border-bottom: 2px solid #000;
+  }
+  
+  td, th {
+    padding: 8px 10px;
+  }
+  
+  tbody tr {
+    border-top: 1px solid #000;
+  }
+  
+  tbody tr:nth-child(even) {
+    background: #efefef;
+  }
+  
+  tbody tr:hover {
+    background: #d6e6ff;
+  }
+  
+  td:first-child {
+    width: 52px;
+    font-weight: 700;
+  }
+  
+  
+  .info {
+    margin-top: 28px;
+  }
+  
+  .faq {
+    display: grid;
+    gap: 10px;
+  }
+  
+  .faq-item,
+  .credits-card {
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+  }
+  
+  .faq-item summary {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  .faq-item summary:hover {
+    background: #d6d6d6;
+  }
+  
+  .faq-body {
+    padding: 0 12px 12px;
+    color: #111;
+  }
+  
+  .faq-body code {
+    background: #fff;
+    border: 1px solid #000;
+    padding: 2px 4px;
+  }
+  
+  /* Credits */
+  
+  .credits {
+    margin-top: 10px;
+  }
+  
+  .credits-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .credits-title {
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  .credits-sub {
+    margin: 6px 0 10px;
+    color: #222;
+  }
+  
+  .credits-list {
+    padding-left: 18px;
+    margin: 0;
+  }
+  
+  .steam-widget iframe {
+    width: 646px;
+    height: 190px;
+    border: none;
+    transform: scale(var(--scale));
+    transform-origin: top left;
+    display: block;
+  }
+
+  .steam-widget {
+    --scale: 0.75;
+    width: calc(646px * var(--scale) + 24px);
+    height: calc(190px * var(--scale) + 24px);
+  
+    margin: 24px auto;
+    padding: 10px;
+  
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+  }
+  
+
+  
+  @media (max-width: 600px) {
+    .steam-widget {
+      --scale: 0.6;
+    }
+  
+    .tabs {
+      flex-wrap: wrap;
+    }
+  }
+  
+  @media (max-width: 420px) {
+    .steam-widget {
+      --scale: 0.55;
+    }
+  
+    main {
+      padding: 16px 10px 48px;
+    }
+  }
+  
