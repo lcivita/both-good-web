@@ -206,6 +206,32 @@
     background: #ffffff;
     color: #000;
     border: 2px solid #000;
+  
+    table-layout: fixed; /* key: columns follow your widths, not content */
+  }
+  
+  /* Rank column */
+  #leaderboard th:nth-child(1),
+  #leaderboard td:nth-child(1) {
+    width: 40px;
+    white-space: nowrap;
+  }
+  
+  /* Score column */
+  #leaderboard th:nth-child(3),
+  #leaderboard td:nth-child(3) {
+    width: 150px;
+    white-space: nowrap;
+    text-align: left;
+  }
+  
+  /* Player column (flexible remaining space) */
+  #leaderboard th:nth-child(2),
+  #leaderboard td:nth-child(2) {
+    width: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   thead {
@@ -216,6 +242,7 @@
     color: #fff;
     font-weight: 700;
     border-bottom: 2px solid #000;
+    text-align: left;
   }
   
   td, th {

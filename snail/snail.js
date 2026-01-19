@@ -107,7 +107,6 @@ async function fetchJsonArray(url) {
   return entries;
 }
 
-// ----- TABBED LEADERBOARD STATE -----
 
 const state = {
   topEntries: [],
@@ -177,11 +176,11 @@ async function init() {
   const status = document.getElementById("leaderboard-status");
   status.textContent = "Loading leaderboard…";
 
-  // Hook up tab clicks
+  // hook up tab clicks
   document.getElementById("tab-top").addEventListener("click", () => setActiveTab("top"));
   document.getElementById("tab-bot").addEventListener("click", () => setActiveTab("bot"));
 
-  // Hook up pagination buttons (shared)
+  // hook up pagination buttons
   document.getElementById("leaderboard-prev").addEventListener("click", () => {
     state.page -= 1;
     draw();
@@ -200,7 +199,7 @@ async function init() {
     // TOP: keep score > 0
     const topEntries = topRaw.filter(e => (e?.score ?? 0) > 0);
 
-    // BOT: keep score <= 0, reverse so "last place is #1"
+    // BOT: keep score <= 0, reverse so last place is #1
     const botEntries = botRaw
       .filter(e => (e?.score ?? 0) <= 0)
       .reverse();
