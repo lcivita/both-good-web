@@ -1,0 +1,351 @@
+<!-- /press/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Don’t Touch the Snail — Press Kit</title>
+  <meta name="description" content="Press kit for Don’t Touch the Snail — a one-life desktop horror game where an immortal snail hunts your mouse cursor." />
+
+  <!-- Open Graph / social -->
+  <meta property="og:title" content="Don’t Touch the Snail — Press Kit" />
+  <meta property="og:description" content="One-life desktop horror game where an immortal snail hunts your mouse cursor in real time." />
+  <meta property="og:type" content="website" />
+  <!-- Optional: set these once you have them -->
+  <!-- <meta property="og:image" content="./assets/keyart_1200x630.jpg" /> -->
+  <!-- <meta property="og:url" content="https://your-site.com/press/" /> -->
+
+  <link rel="stylesheet" href="./press.css" />
+
+</head>
+
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <!-- Optional logo -->
+        <!-- <img class="logo" src="./assets/logo.png" alt="Don’t Touch the Snail logo" /> -->
+        <div>
+          <h1 class="title">Don’t Touch the Snail</h1>
+          <p class="subtitle">Press Kit</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+    
+        <a class="btn primary" href="./downloads/DontTouchTheSnail_PressKit.zip">
+        <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+        Press Kit
+        </a>
+
+        <a class="btn" href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_" target="_blank" rel="noreferrer">
+        <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+        Trailers
+        </a>
+        <a class="btn" href="#contact">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="content" class="wrap">
+    <section class="card intro">
+      <h2>Overview</h2>
+
+      <p class="lede">
+        <strong>Don’t Touch the Snail</strong> is ... [insert short-ish description here. Maybe same as steam ? idk].
+      </p>
+
+      <div class="two-col">
+        <div>
+          <h3>Description (long)</h3>
+          <p>
+            blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+            blah blah blah blah blah blah blah blah blah blah.
+          </p>
+          <p>
+            blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+            blah blah blah blah blah blah blah blah blah blah.
+          </p>
+        </div>
+
+        <aside class="facts">
+          <h3>Facts</h3>
+          <dl class="facts-grid">
+            <div class="fact">
+              <dt>Developer</dt>
+              <dd>Both Good</dd>
+            </div>
+            <div class="fact">
+              <dt>Release</dt>
+              <dd>Q2 2026</dd>
+            </div>
+            <div class="fact">
+              <dt>Platforms</dt>
+              <dd>Windows</dd>
+            </div>
+            <div class="fact">
+              <dt>Genre</dt>
+              <dd>Comedy / Experimental</dd>
+            </div>
+            <div class="fact">
+              <dt>Players</dt>
+              <dd>Single-player / Online leaderboards</dd>
+            </div>
+            <div class="fact">
+              <dt>Price</dt>
+              <dd>$0.99</dd>
+            </div>
+          </dl>
+
+          <div class="link-list">
+            <a class="link" href="https://store.steampowered.com/app/4149320/Dont_Touch_the_Snail/?utm_source=presskit&utm_medium=website&utm_campaign=launch" target="_blank" rel="noreferrer">Steam page</a>
+            <a class="link" href="../index.html" target="_blank" rel="noreferrer">Website</a>
+            <a class="link" href="https://www.instagram.com/bothgoodgames/" target="_blank" rel="noreferrer">Social</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Features</h2>
+      <ul class="bullets">
+        <li>One-life gameplay — death is permanent</li>
+        <li>Live leaderboards</li>
+      </ul>
+    </section>
+
+    <section class="card">
+        <div class="section-head">
+            <h2>Trailers</h2>
+        
+        </div>
+
+        <div class="trailer-carousel" data-count="3">
+            <!-- Main stage -->
+            <div class="trailer-stage">
+            <button class="trailer-arrow left" type="button" aria-label="Previous trailer">‹</button>
+
+            <div class="trailer-frame">
+            <iframe
+                id="trailerPlayer"
+                src="https://www.youtube-nocookie.com/embed/M-TNVd_-O-k"
+                title="Trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"></iframe>
+            </div>
+
+            <button class="trailer-arrow right" type="button" aria-label="Next trailer">›</button>
+            </div>
+
+            <!-- Controls row -->
+            <div class="trailer-controls">
+            <div class="trailer-meta">
+                <span class="trailer-label" id="trailerLabel">Concept</span>
+                <span class="trailer-count" id="trailerCount">1 / 3</span>
+            </div>
+
+            <div class="trailer-dots" aria-label="Trailer selector">
+                <button type="button" class="dot active" aria-label="Trailer 1" data-go="0"></button>
+                <button type="button" class="dot" aria-label="Trailer 2" data-go="1"></button>
+                <button type="button" class="dot" aria-label="Trailer 3" data-go="2"></button>
+            </div>
+            </div>
+
+            <!-- Thumbnails -->
+            <div class="trailer-thumbs" aria-label="Trailer thumbnails">
+            <button type="button" class="thumb active" data-go="0">
+                <img src="./assets/trailer_thumbs/main.png" alt="Trailer thumbnail: Main">
+                <span>Trailer 1: Main</span>
+            </button>
+
+            <button type="button" class="thumb" data-go="1">
+                <img src="./assets/trailer_thumbs/gameplay.png" alt="Trailer thumbnail: Gameplay">
+                <span>Trailer 2: Gameplay</span>
+            </button>
+
+            <button type="button" class="thumb" data-go="2">
+                <img src="./assets/trailer_thumbs/teaser.png" alt="Trailer thumbnail: Teaser">
+                <span>Trailer 3: Teaser</span>
+            </button>
+            </div>
+        </div>
+        <div style="margin-top: 14px; text-align: center;">
+        <a
+        class="btn"
+        href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_"
+        target="_blank"
+        rel="noreferrer"
+        >
+        Download Trailers (MP4)
+        </a>
+        </div>
+        </section>
+
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Media</h2>
+        <div class="section-actions">
+            <a class="btn" href="./downloads/DontTouchTheSnail_Screenshots.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">Screenshots</a>
+
+            <a class="btn" href="./downloads/DontTouchTheSnail_GIFs.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">GIFs</a>
+
+            <a class="btn" href="./downloads/DontTouchTheSnail_Logos.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">Logos</a>
+
+            <a class="btn" href="./downloads/DontTouchTheSnail_KeyArt.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">Key Art</a>
+
+            <a class="btn primary" href="./downloads/DontTouchTheSnail_AllImages.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">All Images</a>
+        </div>
+      </div>
+
+      <div class="gallery">
+        <figure class="shot">
+          <img src="./assets/screenshots/DontTouchTheSnail_Screenshot_01.png" alt="Gameplay screenshot 1" loading="lazy" />
+          <figcaption>Screenshot 1 - Intro</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="./assets/screenshots/DontTouchTheSnail_Screenshot_02.png" alt="Gameplay screenshot 2" loading="lazy" />
+          <figcaption>Screenshot 2 - Collection</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="./assets/screenshots/DontTouchTheSnail_Screenshot_03.png" alt="Gameplay screenshot 3" loading="lazy" />
+          <figcaption>Screenshot 3 - Gameplay</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="./assets/screenshots/DontTouchTheSnail_Screenshot_04.png" alt="Gameplay screenshot 4" loading="lazy" />
+          <figcaption>Screenshot 4 - Leaderboards</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Developer</h2>
+      <p>
+        <strong>Both Good</strong> is an independent game studio based in Brooklyn, NY, focused on small, high-concept
+        games that experiment with format, tone, and player expectations.
+      </p>
+
+      <img src="../../imgs/BG logo.png" style="width: 160px; display: block; margin: 16px auto 0;">
+    </section>
+
+    <section id="contact" class="card contact">
+      <h2>Contact</h2>
+      <p>
+        Press inquiries: <a class="link" href="mailto:press@bothgood.games">press@bothgood.games</a>
+      </p>
+      <p><a class="link" href="https://www.instagram.com/bothgoodgames/" target="_blank" rel="noreferrer">Social</a></p>
+
+      <div class="contact-grid">
+        <div class="contact-item">
+          <h3>Downloads</h3>
+          <p>
+            <a class="btn primary" href="./downloads/DontTouchTheSnail_PressKit.zip">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+            Press Kit
+            </a>
+
+            <a class="btn" href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_" target="_blank" rel="noreferrer">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+            Trailers
+            </a></p>
+          
+        </div>
+        <div class="contact-item">
+          <h3>One-line pitch</h3>
+          <p class="mono">
+            A desktop overlay game about trying not to let a snail touch your mouse… or you’ll never be able to play again.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        © <span id="year"></span> Both Good • <a class="link" href="../../index.html">Home</a>
+      </p>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    (function () {
+    const root = document.querySelector(".trailer-carousel");
+    if (!root) return;
+
+    const prevBtn = root.querySelector(".trailer-arrow.left");
+    const nextBtn = root.querySelector(".trailer-arrow.right");
+    const dots = Array.from(root.querySelectorAll(".dot"));
+    const thumbs = Array.from(root.querySelectorAll(".thumb"));
+    const labelEl = document.getElementById("trailerLabel");
+    const countEl = document.getElementById("trailerCount");
+
+    const player = document.getElementById("trailerPlayer");
+
+    const labels = ["Main", "Gameplay", "Teaser"];
+    const videoIds = ["M-TNVd_-O-k", "cydPW8zx2XM", "hLoMnZ26Q3c"];
+
+    let index = 0;
+
+    function buildSrc(id) {
+        // mute=1 prevents surprise audio if someone clicks quickly
+        return `https://www.youtube-nocookie.com/embed/${id}?rel=0&mute=1`;
+    }
+
+    function setActive(nextIndex) {
+        if (nextIndex < 0) nextIndex = videoIds.length - 1;
+        if (nextIndex >= videoIds.length) nextIndex = 0;
+
+        index = nextIndex;
+
+        // Update iframe (this also stops the previous video)
+        player.setAttribute("src", buildSrc(videoIds[index]));
+        player.setAttribute("title", `Trailer: ${labels[index]}`);
+
+        dots.forEach((d, i) => d.classList.toggle("active", i === index));
+        thumbs.forEach((t, i) => t.classList.toggle("active", i === index));
+
+        if (labelEl) labelEl.textContent = labels[index] || `Trailer ${index + 1}`;
+        if (countEl) countEl.textContent = `${index + 1} / ${videoIds.length}`;
+
+        // Persist selection so Back/Forward restores nicely
+        sessionStorage.setItem("presskit_trailer_index", String(index));
+    }
+
+    function restoreIndex() {
+        const saved = Number(sessionStorage.getItem("presskit_trailer_index"));
+        if (!Number.isNaN(saved)) index = Math.max(0, Math.min(videoIds.length - 1, saved));
+        setActive(index);
+    }
+
+    prevBtn?.addEventListener("click", () => setActive(index - 1));
+    nextBtn?.addEventListener("click", () => setActive(index + 1));
+
+    [...dots, ...thumbs].forEach(btn => {
+        btn.addEventListener("click", () => {
+        const go = Number(btn.dataset.go);
+        if (!Number.isNaN(go)) setActive(go);
+        });
+    });
+
+    root.tabIndex = 0;
+    
+
+    // Handles browser Back/Forward restoring from bfcache
+    window.addEventListener("pageshow", restoreIndex);
+
+    restoreIndex();
+    })();
+    </script>
+</body>
+</html>
