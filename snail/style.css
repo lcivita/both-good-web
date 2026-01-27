@@ -377,4 +377,28 @@
       padding: 16px 10px 48px;
     }
   }
+
+  .solo-link a{
+
+    background: #c0c0c0;
+    color: #000;
+    padding: 4px 10px;
+    border: 2px solid;
+    border-color: #ffffff #404040 #404040 #ffffff;
+    font-weight: 700;
+  }
+
+  .solo-link a:hover {
+    background: #d6d6d6;
+  }
   
+  .solo-link a:active {
+    border-color: #404040 #ffffff #ffffff #404040;
+    padding-top: 5px;
+    padding-bottom: 3px;
+  }
+  
+  .solo-link a:focus-visible {
+    outline: 2px dotted #000;
+    outline-offset: 2px;
+  }
