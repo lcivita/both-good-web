@@ -42,11 +42,31 @@ function formatBotScore(seconds) {
   const day = 86400;
   const year = 31536000;
 
-  if (s < minute) return `≈${Math.round(s)}s`;
-  if (s < hour) return `≈${Math.round(s / minute)}min`;
-  if (s < day) return `≈${Math.round(s / hour)}hrs`;
-  if (s < year) return `≈${Math.round(s / day)}d`;
-  return `≈${Math.round(s / year)}yrs`;
+  const format = (value, singular, plural) =>
+    `≈${value}${value === 1 ? singular : plural}`;
+
+  if (s < minute) {
+    const v = Math.round(s);
+    return format(v, "s", "s"); // seconds can stay "s"
+  }
+
+  if (s < hour) {
+    const v = Math.round(s / minute);
+    return format(v, "min", "min");
+  }
+
+  if (s < day) {
+    const v = Math.round(s / hour);
+    return format(v, "hr", "hrs");
+  }
+
+  if (s < year) {
+    const v = Math.round(s / day);
+    return format(v, "d", "d");
+  }
+
+  const v = Math.round(s / year);
+  return format(v, "yr", "yrs");
 }
 
 function renderPage({ entries, page, tbody, pageLabel, prevBtn, nextBtn, formatScore }) {
