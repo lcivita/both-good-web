@@ -40,10 +40,16 @@
         Press Kit
         </a>
 
-        <a class="btn" href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_" target="_blank" rel="noreferrer">
+        <a class="btn" href="https://drive.google.com/uc?export=download&id=1Z_hlRfIyWjVALsvjkiS-K3xQ4z4J5yZk" target="_blank" rel="noreferrer">
         <img src="./assets/icons/download.svg" alt="" class="btn-icon">
         Trailers
         </a>
+
+        <a class="btn" href="https://drive.google.com/uc?export=download&id=1wsTDNW0MBvvYRzeSC-CxSpfR0EnoBpUs" target="_blank" rel="noreferrer">
+        <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+        Shorts
+        </a>
+
         <a class="btn" href="#contact">Contact</a>
       </div>
     </div>
@@ -92,7 +98,7 @@
             </div>
             <div class="fact">
               <dt>Release</dt>
-              <dd>Q2 2026</dd>
+              <dd>May 29 2026</dd>
             </div>
             <div class="fact">
               <dt>Platforms</dt>
@@ -172,24 +178,24 @@
             <div class="trailer-thumbs" aria-label="Trailer thumbnails">
             <button type="button" class="thumb active" data-go="0">
                 <img src="./assets/trailer_thumbs/main.png" alt="Trailer thumbnail: Main">
-                <span>Trailer 1: Main</span>
+                <span>Trailer 1: Release Date</span>
             </button>
 
             <button type="button" class="thumb" data-go="1">
-                <img src="./assets/trailer_thumbs/gameplay.png" alt="Trailer thumbnail: Gameplay">
-                <span>Trailer 2: Gameplay</span>
+                <img src="./assets/trailer_thumbs/announcement.jpg" alt="Trailer thumbnail: Gameplay">
+                <span>Trailer 2: Anouncement</span>
             </button>
 
             <button type="button" class="thumb" data-go="2">
-                <img src="./assets/trailer_thumbs/teaser.png" alt="Trailer thumbnail: Teaser">
-                <span>Trailer 3: Teaser</span>
+                <img src="./assets/trailer_thumbs/gameplay.png" alt="Trailer thumbnail: Teaser">
+                <span>Trailer 3: Gameplay</span>
             </button>
             </div>
         </div>
         <div style="margin-top: 14px; text-align: center;">
         <a
         class="btn"
-        href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_"
+        href="https://drive.google.com/uc?export=download&id=1Z_hlRfIyWjVALsvjkiS-K3xQ4z4J5yZk"
         target="_blank"
         rel="noreferrer"
         >
@@ -198,7 +204,51 @@
         </div>
         </section>
 
+        <section class="card">
+  <div class="section-head">
+    <h2>Shorts</h2>
 
+    <div class="section-actions">
+    <a
+      class="btn"
+      href="https://drive.google.com/uc?export=download&id=1wsTDNW0MBvvYRzeSC-CxSpfR0EnoBpUs"
+      target="_blank"
+      rel="noreferrer"
+    >
+      <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+      Shorts (MP4)
+    </a>
+  </div>
+  </div>
+
+  <div class="shorts-grid">
+  <div class="short">
+    <div class="short-video">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/YwwH3kJmGRk"
+        title="Short 1"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <p class="short-meta">2.4M views</p>
+  </div>
+
+  <div class="short">
+    <div class="short-video">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/o4Vp_tKaqKw"
+        title="Short 2"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    </div>
+
+    <p class="short-meta">2.2M views</p>
+  </div>
+</div>
+</section>
     <section class="card">
       <div class="section-head">
         <h2>Media</h2>
@@ -294,10 +344,16 @@
             Press Kit
             </a>
 
-            <a class="btn" href="https://drive.google.com/uc?export=download&id=10loNZ436nIKSR7ClD1hW4GeTwkyM4Qr_" target="_blank" rel="noreferrer">
+            <a class="btn" href="https://drive.google.com/uc?export=download&id=1Z_hlRfIyWjVALsvjkiS-K3xQ4z4J5yZk" target="_blank" rel="noreferrer">
             <img src="./assets/icons/download.svg" alt="" class="btn-icon">
             Trailers
+            </a>
+
+            <a class="btn" href="https://drive.google.com/uc?export=download&id=1wsTDNW0MBvvYRzeSC-CxSpfR0EnoBpUs" target="_blank" rel="noreferrer">
+            <img src="./assets/icons/download.svg" alt="" class="btn-icon">
+            Shorts
             </a></p>
+          
           
         </div>
         <div class="contact-item">
@@ -334,8 +390,8 @@
 
     const player = document.getElementById("trailerPlayer");
 
-    const labels = ["Main", "Gameplay", "Teaser"];
-    const videoIds = ["M-TNVd_-O-k", "cydPW8zx2XM", "hLoMnZ26Q3c"];
+    const labels = ["Release Date", "Announcement", "Gameplay"];
+    const videoIds = ["JwvQPJ4Yt7M", "bW3dPCP-4Ms", "hLoMnZ26Q3c"];
 
     let index = 0;
 
