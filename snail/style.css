@@ -1,404 +1,577 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Syne Mono", monospace;
+  color: #000;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: none;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("../imgs/snail_wallpaper.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+  transform: translateZ(0);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  /* background: rgba(0, 0, 0, 0.25); */
+  z-index: -1;
+}
+
+#leaderboards,
+#faq,
+#credits {
+  scroll-margin-top: 24px;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+header {
+  background: #000080;
+  border-bottom: 2px solid #000;
+}
+
+nav {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+nav img {
+  display: block;
+  width: 70px;
+}
+
+nav img:hover {
+  transform: scale(1.06);
+}
+
+/* Toolbar-style nav links */
+.nav-links {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.nav-links a {
+  background: #c0c0c0;
+  color: #000;
+  padding: 4px 10px;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  font-weight: 700;
+}
+
+.nav-links a:hover {
+  background: #d6d6d6;
+}
+
+.nav-links a:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
+
+.nav-links a:focus-visible {
+  outline: 2px dotted #000;
+  outline-offset: 2px;
+}
+
+h2 {
+  display: inline-block;
+  margin: 24px 0 12px;
+  padding: 4px 10px;
+
+  background: #c0c0c0;
+  color: #000;
+  font-weight: 700;
+
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+p {
+  margin: 8px 0 12px;
+  color: #111;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 12px;
+  border-bottom: none;
+}
+
+.tab {
+  background: #000080;
+  color: #ffffff;
+  font-weight: 700;
+
+  padding: 6px 12px;
+  margin-right: 4px;
+  cursor: pointer;
+
+  border: 2px solid;
+  border-color: #9aa6ff #404040 #404040 #9aa6ff;
+
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.tab:hover {
+  filter: brightness(1.08);
+}
+
+.tab.active {
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: none;
+}
+
+#leaderboard-controls {
+  margin: 10px 0 12px;
+  padding: 8px;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+button {
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  padding: 4px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #d6d6d6;
+}
+
+button:active:not(:disabled) {
+  border-color: #404040 #ffffff #ffffff #404040;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  color: #000;
+  border: 2px solid #000;
+
+  table-layout: fixed; /* key: columns follow your widths, not content */
+}
+
+/* Rank column (emoji + number) */
+#leaderboard th:nth-child(1),
+#leaderboard td:nth-child(1) {
+  width: 80px;
+  white-space: nowrap;
+}
+
+/* Score column */
+#leaderboard th:nth-child(3),
+#leaderboard td:nth-child(3) {
+  width: 150px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Player column (flexible remaining space) */
+#leaderboard th:nth-child(2),
+#leaderboard td:nth-child(2) {
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+thead {
+  background: #000080;
+}
+
+th {
+  color: #fff;
+  font-weight: 700;
+  border-bottom: 2px solid #000;
+  text-align: left;
+}
+
+td,
+th {
+  padding: 8px 10px;
+}
+
+tbody tr {
+  border-top: 1px solid #000;
+}
+
+tbody tr:nth-child(even) {
+  background: #efefef;
+}
+
+tbody tr:hover {
+  background: #d6e6ff;
+}
+
+/* Row a player was sent to via search. td background paints over the
+   zebra/hover tr background, so it wins without !important. */
+#leaderboard tbody tr.lb-row-highlight td {
+  background: #fff2a8;
+  animation: lb-flash 1.1s ease-out 1;
+}
+
+#leaderboard tbody tr.lb-row-highlight {
+  outline: 2px solid #000080;
+  outline-offset: -2px;
+}
+
+@keyframes lb-flash {
+  0% {
+    background: #ffd34d;
   }
-  
-  html, body {
-    margin: 0;
-    padding: 0;
-    font-family: "Syne Mono", monospace;
-    color: #000;
-    scroll-behavior: smooth;
+  60% {
+    background: #ffd34d;
   }
-  
-  body {
-    background: none;
+  100% {
+    background: #fff2a8;
   }
-  
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("../imgs/snail_wallpaper.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: -2;
-    transform: translateZ(0);
+}
+
+td:first-child {
+  width: 52px;
+  font-weight: 700;
+}
+
+.info {
+  margin-top: 28px;
+}
+
+.faq {
+  display: grid;
+  gap: 10px;
+}
+
+.faq-item,
+.credits-card {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+.faq-item summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary:hover {
+  background: #d6d6d6;
+}
+
+.faq-body {
+  padding: 0 12px 12px;
+  color: #111;
+}
+
+.faq-body code {
+  background: #fff;
+  border: 1px solid #000;
+  padding: 2px 4px;
+}
+
+/* Credits */
+
+.credits {
+  margin-top: 10px;
+}
+
+.credits-card {
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.credits-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.credits-sub {
+  margin: 6px 0 10px;
+  color: #222;
+}
+
+.credits-list {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.steam-widget iframe {
+  width: 646px;
+  height: 190px;
+  border: none;
+  transform: scale(var(--scale));
+  transform-origin: top left;
+  display: block;
+}
+
+.steam-widget {
+  --scale: 0.75;
+  width: calc(646px * var(--scale) + 24px);
+  height: calc(190px * var(--scale) + 24px);
+
+  margin: 24px auto;
+  padding: 10px;
+
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+}
+
+@media (max-width: 600px) {
+  /* Exact desktop widget, scaled down: a centered card filling the
+     12px-gutter column. The iframe is taken out of flow and pinned so
+     mobile browsers can't auto-resize it; transform scales the real
+     646×190 render uniformly (same content as desktop, just smaller),
+     and overflow:hidden only contains the 646px-wide dead layout area
+     so there's no horizontal page scroll. No internal iframe scroll —
+     that's killed by scrolling="no" on the element. */
+  .steam-widget {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    height: calc(190px * var(--scale) + 24px);
+    overflow: hidden;
   }
-  
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    /* background: rgba(0, 0, 0, 0.25); */
-    z-index: -1;
+
+  .steam-widget iframe {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%) scale(var(--scale));
+    transform-origin: top center;
   }
-  
-  
-  #leaderboards, #faq, #credits {
-    scroll-margin-top: 24px;
-  }
-  
+
+  /* 12px gutter: content runs edge-to-edge with a small margin. */
   main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 24px 16px 64px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
-  
-  header {
-    background: #000080;
-    border-bottom: 2px solid #000;
-  }
-  
-  nav {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  nav a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: 700;
-  }
-  
-  nav img {
-    display: block;
-  }
-  
-  nav img:hover {
-    transform: scale(1.06);
-  }
-  
-  /* Toolbar-style nav links */
-  .nav-links {
-    margin-left: auto;
-    display: flex;
-    gap: 8px;
-  }
-  
-  .nav-links a {
-    background: #c0c0c0;
-    color: #000;
-    padding: 4px 10px;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-    font-weight: 700;
-  }
-  
-  .nav-links a:hover {
-    background: #d6d6d6;
-  }
-  
-  .nav-links a:active {
-    border-color: #404040 #ffffff #ffffff #404040;
-    padding-top: 5px;
-    padding-bottom: 3px;
-  }
-  
-  .nav-links a:focus-visible {
-    outline: 2px dotted #000;
-    outline-offset: 2px;
-  }
-
-
-  h2 {
-    display: inline-block;
-    margin: 24px 0 12px;
-    padding: 4px 10px;
-  
-    background: #c0c0c0;
-    color: #000;
-    font-weight: 700;
-  
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-  }
-  
-  p {
-    margin: 8px 0 12px;
-    color: #111;
-  }
-  
 
   .tabs {
-    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* Header: keep a single row, let the buttons stretch edge-to-edge
+     (to the nav's side padding) instead of overflowing the screen. */
+  nav {
+    gap: 8px;
+  }
+
+  .nav-links {
+    margin-left: 0;
+    flex: 1;
     gap: 4px;
-    margin: 12px 0 12px;
-    border-bottom: none;
-  }
-  
-  .tab {
-    background: #000080;
-    color: #ffffff;
-    font-weight: 700;
-  
-    padding: 6px 12px;
-    margin-right: 4px;
-    cursor: pointer;
-  
-    border: 2px solid;
-    border-color: 
-      #9aa6ff
-      #404040
-      #404040
-      #9aa6ff;
-  
-    box-shadow:
-      inset 1px 1px 0 rgba(255,255,255,0.35),
-      inset -1px -1px 0 rgba(0,0,0,0.4);
-  }
-  
-  .tab:hover {
-    filter: brightness(1.08);
-  }
-  
-  
-  .tab.active {
-    background: #c0c0c0;
-    color: #000;
-    border: 2px solid #000;
-    box-shadow: none;
-  }
-  
-  #leaderboard-controls {
-    margin: 10px 0 12px;
-    padding: 8px;
-    background: #c0c0c0;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  button {
-    background: #c0c0c0;
-    color: #000;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-    padding: 4px 10px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  
-  button:hover:not(:disabled) {
-    background: #d6d6d6;
-  }
-  
-  button:active:not(:disabled) {
-    border-color: #404040 #ffffff #ffffff #404040;
-    padding-top: 5px;
-    padding-bottom: 3px;
-  }
-  
-  button:disabled {
-    opacity: 0.55;
-    cursor: default;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #ffffff;
-    color: #000;
-    border: 2px solid #000;
-  
-    table-layout: fixed; /* key: columns follow your widths, not content */
-  }
-  
-  /* Rank column */
-  #leaderboard th:nth-child(1),
-  #leaderboard td:nth-child(1) {
-    width: 40px;
+  .nav-links a {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    padding: 6px 4px;
+    /* Fluid: shrinks with the viewport so the longest label
+       ("Leaderboards") keeps fitting instead of being clipped. */
+    font-size: clamp(0.46rem, 2.3vw, 0.82rem);
+    letter-spacing: -0.02em;
     white-space: nowrap;
   }
-  
-  /* Score column */
-  #leaderboard th:nth-child(3),
-  #leaderboard td:nth-child(3) {
-    width: 150px;
-    white-space: nowrap;
-    text-align: left;
-  }
-  
-  /* Player column (flexible remaining space) */
-  #leaderboard th:nth-child(2),
-  #leaderboard td:nth-child(2) {
-    width: auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  thead {
-    background: #000080;
-  }
-  
-  th {
-    color: #fff;
-    font-weight: 700;
-    border-bottom: 2px solid #000;
-    text-align: left;
-  }
-  
-  td, th {
-    padding: 8px 10px;
-  }
-  
-  tbody tr {
-    border-top: 1px solid #000;
-  }
-  
-  tbody tr:nth-child(even) {
-    background: #efefef;
-  }
-  
-  tbody tr:hover {
-    background: #d6e6ff;
-  }
-  
-  td:first-child {
-    width: 52px;
-    font-weight: 700;
-  }
-  
-  
-  .info {
-    margin-top: 28px;
-  }
-  
-  .faq {
-    display: grid;
-    gap: 10px;
-  }
-  
-  .faq-item,
-  .credits-card {
-    background: #c0c0c0;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-  }
-  
-  .faq-item summary {
-    padding: 10px 12px;
-    cursor: pointer;
-    font-weight: 700;
-  }
-  
-  .faq-item summary::-webkit-details-marker {
-    display: none;
-  }
-  
-  .faq-item summary:hover {
-    background: #d6d6d6;
-  }
-  
-  .faq-body {
-    padding: 0 12px 12px;
-    color: #111;
-  }
-  
-  .faq-body code {
-    background: #fff;
-    border: 1px solid #000;
-    padding: 2px 4px;
-  }
-  
-  /* Credits */
-  
-  .credits {
-    margin-top: 10px;
-  }
-  
-  .credits-card {
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-  
-  .credits-title {
-    margin: 0;
-    font-weight: 700;
-  }
-  
-  .credits-sub {
-    margin: 6px 0 10px;
-    color: #222;
-  }
-  
-  .credits-list {
-    padding-left: 18px;
-    margin: 0;
-  }
-  
-  .steam-widget iframe {
-    width: 646px;
-    height: 190px;
-    border: none;
-    transform: scale(var(--scale));
-    transform-origin: top left;
-    display: block;
+}
+
+@media (max-width: 420px) {
+  main {
+    padding: 16px 12px 48px;
   }
 
-  .steam-widget {
-    --scale: 0.75;
-    width: calc(646px * var(--scale) + 24px);
-    height: calc(190px * var(--scale) + 24px);
-  
-    margin: 24px auto;
-    padding: 10px;
-  
-    background: #c0c0c0;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-  }
-  
-
-  
-  @media (max-width: 600px) {
-    .steam-widget {
-      --scale: 0.6;
-    }
-  
-    .tabs {
-      flex-wrap: wrap;
-    }
-  }
-  
-  @media (max-width: 420px) {
-    .steam-widget {
-      --scale: 0.55;
-    }
-  
-    main {
-      padding: 16px 10px 48px;
-    }
+  /* Tighter still on very narrow phones: trim the nav gutter and
+     logo so the fluid labels keep their share of the one row. */
+  nav {
+    padding-left: 6px;
+    padding-right: 6px;
   }
 
-  .solo-link a{
-
-    background: #c0c0c0;
-    color: #000;
-    padding: 4px 10px;
-    border: 2px solid;
-    border-color: #ffffff #404040 #404040 #ffffff;
-    font-weight: 700;
+  nav img {
+    width: 44px;
   }
 
-  .solo-link a:hover {
-    background: #d6d6d6;
+  .nav-links {
+    gap: 3px;
   }
-  
-  .solo-link a:active {
-    border-color: #404040 #ffffff #ffffff #404040;
-    padding-top: 5px;
-    padding-bottom: 3px;
+
+  .nav-links a {
+    padding: 6px 2px;
   }
-  
-  .solo-link a:focus-visible {
-    outline: 2px dotted #000;
-    outline-offset: 2px;
-  }
+}
+
+.solo-link a {
+  background: #c0c0c0;
+  color: #000;
+  padding: 4px 10px;
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  font-weight: 700;
+}
+
+.solo-link a:hover {
+  background: #d6d6d6;
+}
+
+.solo-link a:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
+
+.solo-link a:focus-visible {
+  outline: 2px dotted #000;
+  outline-offset: 2px;
+}
+
+/* ── Leaderboard search ── */
+.search-wrap {
+  position: relative;
+  margin: 16px 0;
+  max-width: 400px;
+}
+
+#lb-search {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+#lb-search-results {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  position: absolute;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#lb-search-results li {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+#lb-search-results li:last-child {
+  border-bottom: none;
+}
+#lb-search-results li:hover {
+  background: #f5f5f5;
+}
+
+#lb-search-results li.lb-result-item {
+  cursor: pointer;
+}
+
+#lb-search-results li.lb-result-item:focus,
+#lb-search-results li.lb-result-item:focus-visible {
+  background: #d6e6ff;
+  outline: 2px solid #000080;
+  outline-offset: -2px;
+}
+
+#lb-search-results li img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+#lb-search-results .lb-result-rank {
+  color: #666;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  min-width: 4em;
+}
+
+#lb-search-results .lb-result-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#lb-search-results .lb-result-score {
+  color: #666;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+#lb-search-results .lb-result-none {
+  padding: 12px;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+}

@@ -1,9 +1,54 @@
 const TOP_WORKER_URL =
-  "https://bgweb-snail-leaderboard.pedro-b54.workers.dev/leaderboard?count=50";
+  "https://snail-d1-website.pedro-b54.workers.dev/leaderboard";
 const BOT_WORKER_URL =
-  "https://bgweb-snail-leaderboard.pedro-b54.workers.dev/leaderboard_bottom?count=50";
+  "https://snail-d1-website.pedro-b54.workers.dev/leaderboard_bottom";
+
+const SEARCH_URL = "https://snail-d1-website.pedro-b54.workers.dev/search";
 
 const PAGE_SIZE = 10;
+
+// Status marker shown next to each leaderboard entry.
+const EMOJI_DEAD = "☠️"; // Cemetery — final run is over
+const EMOJI_ALIVE = "🐌"; // Living — snail still going
+
+// Shown when a player has no Steam avatar (e.g. cron backfill hasn't
+// reached them yet, or Steam returned no avatar). Each avatar-less
+// player is assigned one of these deterministically from their
+// steamID, so the same player always shows the same snail.
+const DEFAULT_AVATARS = [
+  "/snail/SnailProfiles/purpleSnail.png",
+  "/snail/SnailProfiles/Snail_EmailIcon.png",
+  "/snail/SnailProfiles/Snail_EmailIcon2.png",
+  "/snail/SnailProfiles/Snail_EmailIcon4.png",
+];
+
+// Stable DJB2 hash of the seed → an index into DEFAULT_AVATARS.
+// Deterministic so a player's snail never changes across pagination,
+// tab switches, or re-searches.
+function pickDefaultAvatar(seed) {
+  const key = String(seed ?? "");
+  let h = 5381;
+  for (let i = 0; i < key.length; i++) {
+    h = ((h << 5) + h + key.charCodeAt(i)) | 0;
+  }
+  return DEFAULT_AVATARS[Math.abs(h) % DEFAULT_AVATARS.length];
+}
+
+// Steam serves these generic silhouettes to players who never set an
+// avatar. Steam still returns a (non-empty) URL for them, so treat
+// these like "no avatar" and show the snail instead. Match on the
+// image hash only — the steamstatic CDN domain and the size suffix
+// (_medium / _full) both change over time.
+const STEAM_DEFAULT_AVATAR_HASHES = [
+  "fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb",
+];
+
+function avatarSrc(url, seed) {
+  if (!url || STEAM_DEFAULT_AVATAR_HASHES.some((h) => url.includes(h))) {
+    return pickDefaultAvatar(seed);
+  }
+  return url;
+}
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -69,7 +114,17 @@ function formatBotScore(seconds) {
   return format(v, "yr", "yrs");
 }
 
-function renderPage({ entries, page, tbody, pageLabel, prevBtn, nextBtn, formatScore }) {
+function renderPage({
+  entries,
+  page,
+  tbody,
+  pageLabel,
+  prevBtn,
+  nextBtn,
+  formatScore,
+  isDead,
+  highlightID,
+}) {
   const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
   page = clamp(page, 0, totalPages - 1);
 
@@ -81,30 +136,39 @@ function renderPage({ entries, page, tbody, pageLabel, prevBtn, nextBtn, formatS
 
   slice.forEach((entry, idx) => {
     const tr = document.createElement("tr");
+    tr.dataset.steamId = entry.steamID ?? "";
+    if (highlightID != null && entry.steamID === highlightID) {
+      tr.classList.add("lb-row-highlight");
+    }
 
     const rankCell = document.createElement("td");
-    rankCell.textContent = start + idx + 1;
+    const rankEmoji = document.createElement("span");
+    rankEmoji.className = "lb-status-emoji";
+    rankEmoji.textContent = isDead ? EMOJI_DEAD : EMOJI_ALIVE;
+    rankEmoji.title = isDead ? "Dead" : "Alive";
+    rankCell.appendChild(rankEmoji);
+    rankCell.appendChild(document.createTextNode(` ${start + idx + 1}`));
 
     const nameCell = document.createElement("td");
 
-    if (entry.avatar) {
-      const avatar = document.createElement("img");
-      avatar.src = entry.avatar;
-      avatar.alt = entry.personaName || "Player avatar";
-      avatar.width = 32;
-      avatar.height = 32;
-      avatar.style.borderRadius = "50%";
-      avatar.style.verticalAlign = "middle";
-      avatar.style.marginRight = "8px";
-      nameCell.appendChild(avatar);
-    }
+    const avatar = document.createElement("img");
+    avatar.src = avatarSrc(entry.avatar, entry.steamID);
+    avatar.alt = entry.personaName || "Player avatar";
+    avatar.width = 32;
+    avatar.height = 32;
+    avatar.style.borderRadius = "50%";
+    avatar.style.verticalAlign = "middle";
+    avatar.style.marginRight = "8px";
+    nameCell.appendChild(avatar);
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = entry.personaName || entry.steamID || "Unknown";
     nameCell.appendChild(nameSpan);
 
     const scoreCell = document.createElement("td");
-    scoreCell.textContent = formatScore ? formatScore(entry.score ?? 0, entry) : String(entry.score ?? 0);
+    scoreCell.textContent = formatScore
+      ? formatScore(entry.score ?? 0, entry)
+      : String(entry.score ?? 0);
 
     tr.appendChild(rankCell);
     tr.appendChild(nameCell);
@@ -123,22 +187,27 @@ async function fetchJsonArray(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
   const entries = await res.json();
-  if (!Array.isArray(entries)) throw new Error(`Worker did not return an array for ${url}`);
+  if (!Array.isArray(entries))
+    throw new Error(`Worker did not return an array for ${url}`);
   return entries;
 }
-
 
 const state = {
   topEntries: [],
   botEntries: [],
+  rankByID: new Map(), // steamID → rank within its leaderboard
   active: "top", // "top" | "bot"
   page: 0,
+  highlightID: null, // steamID of a searched player to flag in the table
 };
 
-function setActiveTab(active) {
-  state.active = active;
-  state.page = 0;
+function rebuildRankMap() {
+  state.rankByID.clear();
+  state.topEntries.forEach((e, i) => state.rankByID.set(e.steamID, i + 1));
+  state.botEntries.forEach((e, i) => state.rankByID.set(e.steamID, i + 1));
+}
 
+function applyTabUI(active) {
   const tabTop = document.getElementById("tab-top");
   const tabBot = document.getElementById("tab-bot");
 
@@ -146,15 +215,61 @@ function setActiveTab(active) {
   tabBot.classList.toggle("active", active === "bot");
   tabTop.setAttribute("aria-selected", active === "top");
   tabBot.setAttribute("aria-selected", active === "bot");
+}
 
+// Manual tab click: reset to the first page and drop any search highlight.
+function setActiveTab(active) {
+  state.active = active;
+  state.page = 0;
+  state.highlightID = null;
+  applyTabUI(active);
   draw();
+}
+
+// Jump straight to the page a searched player is on, switching tabs
+// (Cemetery vs Living) as needed, and highlight their row.
+function goToPlayer(p) {
+  if (!p || !p.steamID) return;
+
+  const target = p.isDead ? "top" : "bot";
+  const entries = target === "top" ? state.topEntries : state.botEntries;
+  const idx = entries.findIndex((e) => e.steamID === p.steamID);
+
+  state.active = target;
+  applyTabUI(target);
+
+  if (idx === -1) {
+    // Matched by search but not on the rendered board (e.g. a dead
+    // player whose score is <= 0, filtered out of the Cemetery).
+    state.page = 0;
+    state.highlightID = null;
+    draw();
+    return;
+  }
+
+  state.page = Math.floor(idx / PAGE_SIZE);
+  state.highlightID = p.steamID;
+  draw();
+
+  const row = document
+    .getElementById("leaderboard")
+    .querySelector(`tbody tr[data-steam-id="${CSS.escape(String(p.steamID))}"]`);
+  if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function getActiveConfig() {
   if (state.active === "top") {
-    return { entries: state.topEntries, formatScore: formatTopScore };
+    return {
+      entries: state.topEntries,
+      formatScore: formatTopScore,
+      isDead: true,
+    };
   }
-  return { entries: state.botEntries, formatScore: formatBotScore };
+  return {
+    entries: state.botEntries,
+    formatScore: formatBotScore,
+    isDead: false,
+  };
 }
 
 function draw() {
@@ -167,7 +282,7 @@ function draw() {
   const nextBtn = document.getElementById("leaderboard-next");
   const pageLabel = document.getElementById("leaderboard-page-label");
 
-  const { entries, formatScore } = getActiveConfig();
+  const { entries, formatScore, isDead } = getActiveConfig();
 
   if (!entries || entries.length === 0) {
     status.style.display = "block";
@@ -189,16 +304,56 @@ function draw() {
     prevBtn,
     nextBtn,
     formatScore,
+    isDead,
+    highlightID: state.highlightID,
   });
+}
+
+// The Steam widget is a fixed 646×190 design shrunk via transform:
+// scale(). Pick the scale that makes its box exactly fill the
+// available column width, clamped so it never exceeds the desktop
+// size (0.75) — so desktop renders identically and only mobile
+// shrinks to fit the gutter.
+function sizeSteamWidget() {
+  const widget = document.querySelector(".steam-widget");
+  if (!widget) return;
+
+  const container = widget.closest("main") || widget.parentElement;
+  if (!container) return;
+
+  const cs = getComputedStyle(container);
+  const avail =
+    container.clientWidth -
+    parseFloat(cs.paddingLeft || "0") -
+    parseFloat(cs.paddingRight || "0");
+
+  // The card fills `avail`; its inner area is avail - 24 (10px
+  // padding ×2 + 2px border ×2). Size the widget ~2px under that so
+  // sub-pixel rounding can never clip an edge — the whole widget
+  // always shows — while staying inside the column (no h-scroll).
+  let scale = (avail - 24 - 2) / 646;
+  scale = Math.max(0.3, Math.min(0.75, scale));
+  widget.style.setProperty("--scale", String(scale));
 }
 
 async function init() {
   const status = document.getElementById("leaderboard-status");
   status.textContent = "Loading leaderboard…";
 
+  sizeSteamWidget();
+  let steamResizeRaf = null;
+  window.addEventListener("resize", () => {
+    if (steamResizeRaf) cancelAnimationFrame(steamResizeRaf);
+    steamResizeRaf = requestAnimationFrame(sizeSteamWidget);
+  });
+
   // hook up tab clicks
-  document.getElementById("tab-top").addEventListener("click", () => setActiveTab("top"));
-  document.getElementById("tab-bot").addEventListener("click", () => setActiveTab("bot"));
+  document
+    .getElementById("tab-top")
+    .addEventListener("click", () => setActiveTab("top"));
+  document
+    .getElementById("tab-bot")
+    .addEventListener("click", () => setActiveTab("bot"));
 
   // hook up pagination buttons
   document.getElementById("leaderboard-prev").addEventListener("click", () => {
@@ -217,15 +372,14 @@ async function init() {
     ]);
 
     // TOP: keep score > 0
-    const topEntries = topRaw.filter(e => (e?.score ?? 0) > 0);
+    const topEntries = topRaw.filter((e) => (e?.score ?? 0) > 0);
 
-    // BOT: keep score <= 0, reverse so last place is #1
-    const botEntries = botRaw
-      .filter(e => (e?.score ?? 0) <= 0)
-      .reverse();
+    // BOT: keep score <= 0 (most-negative = longest alive = #1)
+    const botEntries = botRaw.filter((e) => (e?.score ?? 0) <= 0);
 
     state.topEntries = topEntries;
     state.botEntries = botEntries;
+    rebuildRankMap();
 
     // default view
     setActiveTab("top");
@@ -233,6 +387,164 @@ async function init() {
     console.error("Leaderboard init failed:", err);
     status.textContent = "Could not load leaderboard…";
   }
+
+  setupSearch();
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+// GPT AAAAAAAAAAAAAAH SEARCH_URL
+function renderSearchResults(items, list, input) {
+  list.innerHTML = "";
+
+  if (items.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "lb-result-none";
+    empty.textContent = "No players found.";
+    list.appendChild(empty);
+    list.hidden = false;
+    return;
+  }
+
+  items.forEach((p) => {
+    const li = document.createElement("li");
+    li.className = "lb-result-item";
+    li.tabIndex = 0;
+    li.setAttribute("role", "option");
+    const choose = () => selectResult(p, input, list);
+    li.addEventListener("click", choose);
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        choose();
+      }
+    });
+
+    const rank = state.rankByID.get(p.steamID);
+    const emoji = p.isDead ? EMOJI_DEAD : EMOJI_ALIVE;
+    const rankEl = document.createElement("span");
+    rankEl.className = "lb-result-rank";
+    rankEl.textContent = rank ? `${emoji} #${rank}` : `${emoji} —`;
+    rankEl.title = p.isDead ? "Dead" : "Alive";
+    li.appendChild(rankEl);
+
+    const img = document.createElement("img");
+    img.src = avatarSrc(p.avatar, p.steamID);
+    img.alt = "";
+    li.appendChild(img);
+
+    const name = document.createElement("span");
+    name.className = "lb-result-name";
+    name.textContent = p.personaName || p.steamID || "Unknown";
+    li.appendChild(name);
+
+    const score = document.createElement("span");
+    score.className = "lb-result-score";
+    score.textContent = p.isDead
+      ? formatTopScore(p.score)
+      : formatBotScore(p.score);
+    li.appendChild(score);
+
+    list.appendChild(li);
+  });
+
+  list.hidden = false;
+}
+
+// A search result was clicked / activated: close the dropdown, reflect
+// the chosen name in the box, and jump to that player on the board.
+function selectResult(p, input, list) {
+  if (list) list.hidden = true;
+  if (input) input.value = p.personaName || p.steamID || "";
+  goToPlayer(p);
+}
+
+function setupSearch() {
+  const input = document.getElementById("lb-search");
+  const list = document.getElementById("lb-search-results");
+  if (!input || !list) return;
+
+  list.setAttribute("role", "listbox");
+  input.setAttribute("role", "combobox");
+  input.setAttribute("aria-controls", "lb-search-results");
+  input.setAttribute("aria-autocomplete", "list");
+
+  let debounceTimer = null;
+  let inFlightToken = null;
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+    if (q.length < 2) {
+      list.hidden = true;
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      const myToken = (inFlightToken = Symbol("search"));
+      try {
+        const res = await fetch(`${SEARCH_URL}?q=${encodeURIComponent(q)}`);
+        if (inFlightToken !== myToken) return; // stale
+        if (!res.ok) {
+          list.hidden = true;
+          return;
+        }
+        const items = await res.json();
+        if (inFlightToken !== myToken) return; // stale
+        renderSearchResults(items, list, input);
+      } catch (err) {
+        console.error("Search failed:", err);
+        list.hidden = true;
+      }
+    }, 250);
+  });
+
+  // Click outside → close
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !list.contains(e.target)) {
+      list.hidden = true;
+    }
+  });
+
+  // Escape → clear + close. Arrow keys → move through results.
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      input.value = "";
+      list.hidden = true;
+      return;
+    }
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      const opts = list.querySelectorAll(".lb-result-item");
+      if (list.hidden || opts.length === 0) return;
+      e.preventDefault();
+      const dir = e.key === "ArrowDown" ? 1 : -1;
+      let i = Array.prototype.indexOf.call(opts, document.activeElement);
+      i = (i + dir + opts.length) % opts.length;
+      opts[i].focus();
+    }
+  });
+
+  // Arrow keys while a result is focused: keep moving through the list.
+  list.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const opts = list.querySelectorAll(".lb-result-item");
+    if (opts.length === 0) return;
+    e.preventDefault();
+    const dir = e.key === "ArrowDown" ? 1 : -1;
+    let i = Array.prototype.indexOf.call(opts, document.activeElement);
+    if (i === -1) {
+      opts[0].focus();
+      return;
+    }
+    i = (i + dir + opts.length) % opts.length;
+    opts[i].focus();
+  });
+
+  // Refocus → reopen if still has results
+  input.addEventListener("focus", () => {
+    if (list.children.length > 0 && input.value.trim().length >= 2) {
+      list.hidden = false;
+    }
+  });
+}
