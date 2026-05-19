@@ -36,7 +36,27 @@
 
     <main>
       <section id="leaderboards">
+
+
+
+
+
         <h2>Leaderboards</h2>
+
+                        <!-- START NEW CODE -->
+        <div class="search-wrap">
+  <input
+    id="lb-search"
+    type="text"
+    placeholder="Search by player name…"
+    maxlength="32"
+    autocomplete="off"
+  />
+  <ul id="lb-search-results" hidden></ul>
+</div>
+
+<!-- END NEW CODE -->
+ 
         <div class="tabs" role="tablist" aria-label="Leaderboard tabs">
           <button id="tab-top" class="tab active" role="tab" aria-selected="true">
             ☠️ Cemetery
@@ -45,6 +65,8 @@
             🐌 Living
           </button>
         </div>
+
+
       
         <p id="leaderboard-status">Loading leaderboard…</p>
       
