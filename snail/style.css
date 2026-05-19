@@ -69,6 +69,7 @@ nav a {
 
 nav img {
   display: block;
+  width: 70px;
 }
 
 nav img:hover {
@@ -376,22 +377,86 @@ td:first-child {
 }
 
 @media (max-width: 600px) {
+  /* Exact desktop widget, scaled down: a centered card filling the
+     12px-gutter column. The iframe is taken out of flow and pinned so
+     mobile browsers can't auto-resize it; transform scales the real
+     646×190 render uniformly (same content as desktop, just smaller),
+     and overflow:hidden only contains the 646px-wide dead layout area
+     so there's no horizontal page scroll. No internal iframe scroll —
+     that's killed by scrolling="no" on the element. */
   .steam-widget {
-    --scale: 0.6;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    height: calc(190px * var(--scale) + 24px);
+    overflow: hidden;
+  }
+
+  .steam-widget iframe {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%) scale(var(--scale));
+    transform-origin: top center;
+  }
+
+  /* 12px gutter: content runs edge-to-edge with a small margin. */
+  main {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .tabs {
     flex-wrap: wrap;
   }
+
+  /* Header: keep a single row, let the buttons stretch edge-to-edge
+     (to the nav's side padding) instead of overflowing the screen. */
+  nav {
+    gap: 8px;
+  }
+
+  .nav-links {
+    margin-left: 0;
+    flex: 1;
+    gap: 4px;
+  }
+
+  .nav-links a {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    padding: 6px 4px;
+    /* Fluid: shrinks with the viewport so the longest label
+       ("Leaderboards") keeps fitting instead of being clipped. */
+    font-size: clamp(0.46rem, 2.3vw, 0.82rem);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 420px) {
-  .steam-widget {
-    --scale: 0.55;
+  main {
+    padding: 16px 12px 48px;
   }
 
-  main {
-    padding: 16px 10px 48px;
+  /* Tighter still on very narrow phones: trim the nav gutter and
+     logo so the fluid labels keep their share of the one row. */
+  nav {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  nav img {
+    width: 44px;
+  }
+
+  .nav-links {
+    gap: 3px;
+  }
+
+  .nav-links a {
+    padding: 6px 2px;
   }
 }
 

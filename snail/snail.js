@@ -309,9 +309,43 @@ function draw() {
   });
 }
 
+// The Steam widget is a fixed 646×190 design shrunk via transform:
+// scale(). Pick the scale that makes its box exactly fill the
+// available column width, clamped so it never exceeds the desktop
+// size (0.75) — so desktop renders identically and only mobile
+// shrinks to fit the gutter.
+function sizeSteamWidget() {
+  const widget = document.querySelector(".steam-widget");
+  if (!widget) return;
+
+  const container = widget.closest("main") || widget.parentElement;
+  if (!container) return;
+
+  const cs = getComputedStyle(container);
+  const avail =
+    container.clientWidth -
+    parseFloat(cs.paddingLeft || "0") -
+    parseFloat(cs.paddingRight || "0");
+
+  // The card fills `avail`; its inner area is avail - 24 (10px
+  // padding ×2 + 2px border ×2). Size the widget ~2px under that so
+  // sub-pixel rounding can never clip an edge — the whole widget
+  // always shows — while staying inside the column (no h-scroll).
+  let scale = (avail - 24 - 2) / 646;
+  scale = Math.max(0.3, Math.min(0.75, scale));
+  widget.style.setProperty("--scale", String(scale));
+}
+
 async function init() {
   const status = document.getElementById("leaderboard-status");
   status.textContent = "Loading leaderboard…";
+
+  sizeSteamWidget();
+  let steamResizeRaf = null;
+  window.addEventListener("resize", () => {
+    if (steamResizeRaf) cancelAnimationFrame(steamResizeRaf);
+    steamResizeRaf = requestAnimationFrame(sizeSteamWidget);
+  });
 
   // hook up tab clicks
   document
