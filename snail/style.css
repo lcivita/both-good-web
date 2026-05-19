@@ -205,10 +205,10 @@ table {
   table-layout: fixed; /* key: columns follow your widths, not content */
 }
 
-/* Rank column */
+/* Rank column (emoji + number) */
 #leaderboard th:nth-child(1),
 #leaderboard td:nth-child(1) {
-  width: 40px;
+  width: 80px;
   white-space: nowrap;
 }
 
@@ -488,7 +488,7 @@ td:first-child {
   color: #666;
   font-size: 0.9rem;
   flex-shrink: 0;
-  min-width: 2.5em;
+  min-width: 4em;
 }
 
 #lb-search-results .lb-result-name {

@@ -7,6 +7,10 @@ const SEARCH_URL = "https://snail-d1-website.pedro-b54.workers.dev/search";
 
 const PAGE_SIZE = 10;
 
+// Status marker shown next to each leaderboard entry.
+const EMOJI_DEAD = "☠️"; // Cemetery — final run is over
+const EMOJI_ALIVE = "🐌"; // Living — snail still going
+
 // Shown when a player has no Steam avatar (e.g. cron backfill hasn't
 // reached them yet, or Steam returned no avatar). Each avatar-less
 // player is assigned one of these deterministically from their
@@ -118,6 +122,7 @@ function renderPage({
   prevBtn,
   nextBtn,
   formatScore,
+  isDead,
   highlightID,
 }) {
   const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
@@ -137,7 +142,12 @@ function renderPage({
     }
 
     const rankCell = document.createElement("td");
-    rankCell.textContent = start + idx + 1;
+    const rankEmoji = document.createElement("span");
+    rankEmoji.className = "lb-status-emoji";
+    rankEmoji.textContent = isDead ? EMOJI_DEAD : EMOJI_ALIVE;
+    rankEmoji.title = isDead ? "Dead" : "Alive";
+    rankCell.appendChild(rankEmoji);
+    rankCell.appendChild(document.createTextNode(` ${start + idx + 1}`));
 
     const nameCell = document.createElement("td");
 
@@ -249,9 +259,17 @@ function goToPlayer(p) {
 
 function getActiveConfig() {
   if (state.active === "top") {
-    return { entries: state.topEntries, formatScore: formatTopScore };
+    return {
+      entries: state.topEntries,
+      formatScore: formatTopScore,
+      isDead: true,
+    };
   }
-  return { entries: state.botEntries, formatScore: formatBotScore };
+  return {
+    entries: state.botEntries,
+    formatScore: formatBotScore,
+    isDead: false,
+  };
 }
 
 function draw() {
@@ -264,7 +282,7 @@ function draw() {
   const nextBtn = document.getElementById("leaderboard-next");
   const pageLabel = document.getElementById("leaderboard-page-label");
 
-  const { entries, formatScore } = getActiveConfig();
+  const { entries, formatScore, isDead } = getActiveConfig();
 
   if (!entries || entries.length === 0) {
     status.style.display = "block";
@@ -286,6 +304,7 @@ function draw() {
     prevBtn,
     nextBtn,
     formatScore,
+    isDead,
     highlightID: state.highlightID,
   });
 }
@@ -368,9 +387,11 @@ function renderSearchResults(items, list, input) {
     });
 
     const rank = state.rankByID.get(p.steamID);
+    const emoji = p.isDead ? EMOJI_DEAD : EMOJI_ALIVE;
     const rankEl = document.createElement("span");
     rankEl.className = "lb-result-rank";
-    rankEl.textContent = rank ? `#${rank}` : "—";
+    rankEl.textContent = rank ? `${emoji} #${rank}` : `${emoji} —`;
+    rankEl.title = p.isDead ? "Dead" : "Alive";
     li.appendChild(rankEl);
 
     const img = document.createElement("img");
