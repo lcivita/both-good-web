@@ -4,8 +4,16 @@ const BOT_WORKER_URL =
   "https://snail-d1-website.pedro-b54.workers.dev/leaderboard_bottom";
 
 const SEARCH_URL = "https://snail-d1-website.pedro-b54.workers.dev/search";
+const RANK_URL = "https://snail-d1-website.pedro-b54.workers.dev/rank";
+const RANKS_URL = "https://snail-d1-website.pedro-b54.workers.dev/ranks";
 
 const PAGE_SIZE = 10;
+// Must match LEADERBOARD_CAP in worker.js. Each leaderboard fetch
+// returns up to CHUNK_SIZE rows; the client keeps them in a sparse
+// buffer indexed by rank-1 and lazily fetches more chunks as the user
+// paginates past the loaded set or jumps to a player whose rank is in
+// an unloaded chunk.
+const CHUNK_SIZE = 200;
 
 // Status marker shown next to each leaderboard entry.
 const EMOJI_DEAD = "☠️"; // Cemetery — final run is over
@@ -114,8 +122,14 @@ function formatBotScore(seconds) {
   return format(v, "yr", "yrs");
 }
 
+// Renders the rows for one page of one side. `entries` is a sparse
+// array indexed by rank-1; only filled slots in [start, end) get drawn.
+// If a slot is empty the row is just skipped (the caller should have
+// called ensureChunkLoaded first, but a missed chunk just shows a gap
+// rather than crashing).
 function renderPage({
   entries,
+  total,
   page,
   tbody,
   pageLabel,
@@ -125,16 +139,18 @@ function renderPage({
   isDead,
   highlightID,
 }) {
-  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   page = clamp(page, 0, totalPages - 1);
 
   tbody.innerHTML = "";
 
   const start = page * PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, entries.length);
-  const slice = entries.slice(start, end);
+  const end = Math.min(start + PAGE_SIZE, total);
 
-  slice.forEach((entry, idx) => {
+  for (let i = start; i < end; i++) {
+    const entry = entries[i];
+    if (!entry) continue;
+
     const tr = document.createElement("tr");
     tr.dataset.steamId = entry.steamID ?? "";
     if (highlightID != null && entry.steamID === highlightID) {
@@ -147,7 +163,7 @@ function renderPage({
     rankEmoji.textContent = isDead ? EMOJI_DEAD : EMOJI_ALIVE;
     rankEmoji.title = isDead ? "Dead" : "Alive";
     rankCell.appendChild(rankEmoji);
-    rankCell.appendChild(document.createTextNode(` ${start + idx + 1}`));
+    rankCell.appendChild(document.createTextNode(` ${i + 1}`));
 
     const nameCell = document.createElement("td");
 
@@ -174,37 +190,69 @@ function renderPage({
     tr.appendChild(nameCell);
     tr.appendChild(scoreCell);
     tbody.appendChild(tr);
-  });
+  }
 
-  pageLabel.textContent = `${start + 1}-${end} of ${entries.length} (Page ${page + 1}/${totalPages})`;
+  pageLabel.textContent = `${start + 1}-${end} of ${total} (Page ${page + 1}/${totalPages})`;
   prevBtn.disabled = page === 0;
   nextBtn.disabled = page === totalPages - 1;
 
   return page;
 }
 
-async function fetchJsonArray(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  const entries = await res.json();
-  if (!Array.isArray(entries))
-    throw new Error(`Worker did not return an array for ${url}`);
-  return entries;
-}
-
 const state = {
+  // Sparse arrays — entries[rank - 1] = player. Holes are unloaded
+  // ranks; ensureChunkLoaded fills them on demand.
   topEntries: [],
   botEntries: [],
-  rankByID: new Map(), // steamID → rank within its leaderboard
+  // Server-reported total for each side, captured from the initial
+  // /leaderboard?offset=0 fetch. Drives "Page N of M" and end-of-list
+  // detection.
+  topTotal: 0,
+  botTotal: 0,
+  // Which CHUNK_SIZE-aligned offsets we've already fetched, so repeat
+  // visits are free and we don't refetch on every pagination click.
+  topLoaded: new Set(),
+  botLoaded: new Set(),
+  rankByID: new Map(), // steamID → rank, only for loaded entries
   active: "top", // "top" | "bot"
   page: 0,
   highlightID: null, // steamID of a searched player to flag in the table
 };
 
-function rebuildRankMap() {
-  state.rankByID.clear();
-  state.topEntries.forEach((e, i) => state.rankByID.set(e.steamID, i + 1));
-  state.botEntries.forEach((e, i) => state.rankByID.set(e.steamID, i + 1));
+// Dedup concurrent fetches for the same chunk (rapid Next clicks, or
+// a search-click landing in a chunk we just started loading). Maps
+// "side:offset" → in-flight Promise.
+const inFlightChunks = new Map();
+
+async function ensureChunkLoaded(side, offset) {
+  const loaded = side === "top" ? state.topLoaded : state.botLoaded;
+  if (loaded.has(offset)) return;
+
+  const key = `${side}:${offset}`;
+  const existing = inFlightChunks.get(key);
+  if (existing) return existing;
+
+  const baseUrl = side === "top" ? TOP_WORKER_URL : BOT_WORKER_URL;
+  const promise = (async () => {
+    const res = await fetch(`${baseUrl}?offset=${offset}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} for ${baseUrl}?offset=${offset}`);
+    const data = await res.json();
+    const entries = data?.entries ?? [];
+
+    const arr = side === "top" ? state.topEntries : state.botEntries;
+    for (let i = 0; i < entries.length; i++) {
+      arr[offset + i] = entries[i];
+      state.rankByID.set(entries[i].steamID, offset + i + 1);
+    }
+    loaded.add(offset);
+  })();
+
+  inFlightChunks.set(key, promise);
+  try {
+    await promise;
+  } finally {
+    inFlightChunks.delete(key);
+  }
 }
 
 function applyTabUI(active) {
@@ -227,29 +275,49 @@ function setActiveTab(active) {
 }
 
 // Jump straight to the page a searched player is on, switching tabs
-// (Cemetery vs Living) as needed, and highlight their row.
-function goToPlayer(p) {
+// (Cemetery vs Living) as needed, and highlight their row. Rank
+// resolution prefers (1) the value embedded in the /search payload —
+// the common path, no extra round-trip; (2) state.rankByID if the
+// player is already visible in a loaded chunk; (3) /rank as a last
+// resort for callers that synthesize their own `p` without rank.
+async function goToPlayer(p) {
   if (!p || !p.steamID) return;
 
   const target = p.isDead ? "top" : "bot";
-  const entries = target === "top" ? state.topEntries : state.botEntries;
-  const idx = entries.findIndex((e) => e.steamID === p.steamID);
-
   state.active = target;
   applyTabUI(target);
 
-  if (idx === -1) {
-    // Matched by search but not on the rendered board (e.g. a dead
-    // player whose score is <= 0, filtered out of the Cemetery).
+  let rank = p.rank ?? state.rankByID.get(p.steamID);
+
+  if (!rank) {
+    try {
+      const res = await fetch(
+        `${RANK_URL}?steamId=${encodeURIComponent(p.steamID)}`,
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.rank === "number") {
+          rank = data.rank;
+        }
+      }
+    } catch (err) {
+      console.error("Rank lookup failed:", err);
+    }
+  }
+
+  if (!rank) {
+    // Search match but no leaderboard rank (e.g. alive with score ≥ 0,
+    // or /rank returned null). Show the first page with no highlight.
     state.page = 0;
     state.highlightID = null;
     draw();
     return;
   }
 
-  state.page = Math.floor(idx / PAGE_SIZE);
+  state.rankByID.set(p.steamID, rank);
+  state.page = Math.floor((rank - 1) / PAGE_SIZE);
   state.highlightID = p.steamID;
-  draw();
+  await draw(); // draw() awaits ensureChunkLoaded for state.page internally
 
   const row = document
     .getElementById("leaderboard")
@@ -261,18 +329,22 @@ function getActiveConfig() {
   if (state.active === "top") {
     return {
       entries: state.topEntries,
+      total: state.topTotal,
+      side: "top",
       formatScore: formatTopScore,
       isDead: true,
     };
   }
   return {
     entries: state.botEntries,
+    total: state.botTotal,
+    side: "bot",
     formatScore: formatBotScore,
     isDead: false,
   };
 }
 
-function draw() {
+async function draw() {
   const status = document.getElementById("leaderboard-status");
   const table = document.getElementById("leaderboard");
   const tbody = table.querySelector("tbody");
@@ -282,9 +354,9 @@ function draw() {
   const nextBtn = document.getElementById("leaderboard-next");
   const pageLabel = document.getElementById("leaderboard-page-label");
 
-  const { entries, formatScore, isDead } = getActiveConfig();
+  const { entries, total, side, formatScore, isDead } = getActiveConfig();
 
-  if (!entries || entries.length === 0) {
+  if (!total) {
     status.style.display = "block";
     status.textContent = "No entries yet.";
     table.style.display = "none";
@@ -296,8 +368,29 @@ function draw() {
   table.style.display = "table";
   controls.style.display = "flex";
 
+  // Make sure the chunk for the current page is loaded before drawing.
+  // The previous page stays visible during the fetch (we don't clear
+  // tbody until renderPage runs), which is preferable to flashing
+  // empty rows. If the chunk isn't loaded yet, show a brief loading
+  // hint in the page label so search-jumps to far-away ranks feel
+  // responsive instead of "did nothing happen?"
+  const start = state.page * PAGE_SIZE;
+  const chunkOffset = Math.floor(start / CHUNK_SIZE) * CHUNK_SIZE;
+  const loadedSet = side === "top" ? state.topLoaded : state.botLoaded;
+  if (!loadedSet.has(chunkOffset)) {
+    pageLabel.textContent = `Loading rank ${start + 1}…`;
+  }
+  try {
+    await ensureChunkLoaded(side, chunkOffset);
+  } catch (err) {
+    console.error("Chunk load failed:", err);
+    // Fall through and render whatever's loaded; if nothing's loaded
+    // for this page the row will just be empty.
+  }
+
   state.page = renderPage({
     entries,
+    total,
     page: state.page,
     tbody,
     pageLabel,
@@ -355,7 +448,9 @@ async function init() {
     .getElementById("tab-bot")
     .addEventListener("click", () => setActiveTab("bot"));
 
-  // hook up pagination buttons
+  // hook up pagination buttons. draw() is async but we deliberately
+  // don't await it here — the click handler fires-and-forgets, and any
+  // chunk fetch errors are logged inside draw().
   document.getElementById("leaderboard-prev").addEventListener("click", () => {
     state.page -= 1;
     draw();
@@ -366,20 +461,29 @@ async function init() {
   });
 
   try {
-    const [topRaw, botRaw] = await Promise.all([
-      fetchJsonArray(TOP_WORKER_URL),
-      fetchJsonArray(BOT_WORKER_URL),
+    // First fetch of each side: returns { entries, total }. We seed
+    // the sparse buffers from these chunks and trust the server's
+    // total for "Page N of M" — totals refresh organically as the
+    // edge cache expires.
+    const [topRes, botRes] = await Promise.all([
+      fetch(`${TOP_WORKER_URL}?offset=0`).then((r) => r.json()),
+      fetch(`${BOT_WORKER_URL}?offset=0`).then((r) => r.json()),
     ]);
 
-    // TOP: keep score > 0
-    const topEntries = topRaw.filter((e) => (e?.score ?? 0) > 0);
-
-    // BOT: keep score <= 0 (most-negative = longest alive = #1)
-    const botEntries = botRaw.filter((e) => (e?.score ?? 0) <= 0);
-
-    state.topEntries = topEntries;
-    state.botEntries = botEntries;
-    rebuildRankMap();
+    const topEntries = topRes?.entries ?? [];
+    const botEntries = botRes?.entries ?? [];
+    topEntries.forEach((e, i) => {
+      state.topEntries[i] = e;
+      state.rankByID.set(e.steamID, i + 1);
+    });
+    botEntries.forEach((e, i) => {
+      state.botEntries[i] = e;
+      state.rankByID.set(e.steamID, i + 1);
+    });
+    state.topTotal = topRes?.total ?? topEntries.length;
+    state.botTotal = botRes?.total ?? botEntries.length;
+    state.topLoaded.add(0);
+    state.botLoaded.add(0);
 
     // default view
     setActiveTab("top");
@@ -406,11 +510,17 @@ function renderSearchResults(items, list, input) {
     return;
   }
 
+  // Initial render: instant. Rank starts as either a cached value
+  // from a loaded chunk (or a previous /ranks/rank call) or "—". The
+  // dropdown appears immediately, then fillSearchRanks fires below
+  // to fetch any unknowns in the background and patch the chips in
+  // place.
   items.forEach((p) => {
     const li = document.createElement("li");
     li.className = "lb-result-item";
     li.tabIndex = 0;
     li.setAttribute("role", "option");
+    li.dataset.steamId = p.steamID ?? "";
     const choose = () => selectResult(p, input, list);
     li.addEventListener("click", choose);
     li.addEventListener("keydown", (e) => {
@@ -420,11 +530,11 @@ function renderSearchResults(items, list, input) {
       }
     });
 
-    const rank = state.rankByID.get(p.steamID);
+    const cachedRank = state.rankByID.get(p.steamID);
     const emoji = p.isDead ? EMOJI_DEAD : EMOJI_ALIVE;
     const rankEl = document.createElement("span");
     rankEl.className = "lb-result-rank";
-    rankEl.textContent = rank ? `${emoji} #${rank}` : `${emoji} —`;
+    rankEl.textContent = cachedRank ? `${emoji} #${cachedRank}` : `${emoji} —`;
     rankEl.title = p.isDead ? "Dead" : "Alive";
     li.appendChild(rankEl);
 
@@ -448,7 +558,63 @@ function renderSearchResults(items, list, input) {
     list.appendChild(li);
   });
 
+  // Unhide the populated list. Earlier `input` events with q<2 set
+  // hidden=true to clear the dropdown while the user is mid-type, so
+  // we have to explicitly reopen it on every successful render —
+  // otherwise the list is fully populated but invisible until something
+  // else triggers a re-show (refocus, etc.).
   list.hidden = false;
+
+  // Fire-and-forget: resolve ranks for any results we don't already
+  // know about, then patch the rank chips in-place. Off the typing
+  // critical path so a slow rank computation can't hide the dropdown.
+  fillSearchRanks(items, list);
+}
+
+// Lookup table of player isDead state for the current search render,
+// so we can pick the right emoji when patching rank chips later.
+async function fillSearchRanks(items, list) {
+  const missing = items
+    .map((p) => p.steamID)
+    .filter((id) => id && !state.rankByID.has(id));
+  if (missing.length === 0) return;
+
+  let ranks;
+  try {
+    const res = await fetch(
+      `${RANKS_URL}?steamIds=${missing.map(encodeURIComponent).join(",")}`,
+    );
+    if (!res.ok) return;
+    ranks = await res.json();
+  } catch (err) {
+    console.error("Batched rank lookup failed:", err);
+    return;
+  }
+  if (!Array.isArray(ranks)) return;
+
+  // Stash so subsequent searches / clicks are free.
+  for (const r of ranks) {
+    if (r && r.steamID && typeof r.rank === "number") {
+      state.rankByID.set(r.steamID, r.rank);
+    }
+  }
+
+  // Patch the chips for whichever results are still rendered in the
+  // dropdown. If the user has typed more characters and the list has
+  // since rerendered with different items, the data-steam-id query
+  // simply misses and we no-op.
+  const isDeadById = new Map(items.map((p) => [p.steamID, !!p.isDead]));
+  for (const r of ranks) {
+    if (!r || typeof r.rank !== "number") continue;
+    const li = list.querySelector(
+      `li[data-steam-id="${CSS.escape(String(r.steamID))}"]`,
+    );
+    if (!li) continue;
+    const chip = li.querySelector(".lb-result-rank");
+    if (!chip) continue;
+    const emoji = isDeadById.get(r.steamID) ? EMOJI_DEAD : EMOJI_ALIVE;
+    chip.textContent = `${emoji} #${r.rank}`;
+  }
 }
 
 // A search result was clicked / activated: close the dropdown, reflect
@@ -480,6 +646,8 @@ function setupSearch() {
       return;
     }
 
+    // 120ms debounce balances typing burst protection against
+    // perceived responsiveness — 250ms felt sluggish in testing.
     debounceTimer = setTimeout(async () => {
       const myToken = (inFlightToken = Symbol("search"));
       try {
@@ -496,7 +664,7 @@ function setupSearch() {
         console.error("Search failed:", err);
         list.hidden = true;
       }
-    }, 250);
+    }, 120);
   });
 
   // Click outside → close
