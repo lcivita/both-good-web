@@ -93,33 +93,32 @@ function formatBotScore(seconds) {
   const minute = 60;
   const hour = 3600;
   const day = 86400;
-  const year = 31536000;
 
-  const format = (value, singular, plural) =>
-    `≈${value}${value === 1 ? singular : plural}`;
+  // Sub-minute and sub-hour stay single-value — we don't break minutes
+  // into m+s.
+  if (s < minute) return `≈${s}s`;
 
-  if (s < minute) {
-    const v = Math.round(s);
-    return format(v, "s", "s"); // seconds can stay "s"
-  }
+  const totalMin = Math.round(s / minute);
+  if (totalMin < 60) return `≈${totalMin}m`;
 
-  if (s < hour) {
-    const v = Math.round(s / minute);
-    return format(v, "min", "min");
-  }
+  // Hours + minutes. Decompose the minute-precise total so a value like
+  // 23h 59.7m rolls up to "1d" via the next branch instead of "24h".
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h < 24) return m === 0 ? `≈${h}h` : `≈${h}h ${m}m`;
 
-  if (s < day) {
-    const v = Math.round(s / hour);
-    return format(v, "hr", "hrs");
-  }
+  // Days + hours. Re-round at hour precision so trailing minutes don't
+  // leak into the day count.
+  const totalHours = Math.round(s / hour);
+  const d = Math.floor(totalHours / 24);
+  const remH = totalHours % 24;
+  if (d < 365) return remH === 0 ? `≈${d}d` : `≈${d}d ${remH}h`;
 
-  if (s < year) {
-    const v = Math.round(s / day);
-    return format(v, "d", "d");
-  }
-
-  const v = Math.round(s / year);
-  return format(v, "yr", "yrs");
+  // Years + days. Re-round at day precision.
+  const totalDays = Math.round(s / day);
+  const y = Math.floor(totalDays / 365);
+  const remD = totalDays % 365;
+  return remD === 0 ? `≈${y}y` : `≈${y}y ${remD}d`;
 }
 
 // Renders the rows for one page of one side. `entries` is a sparse
