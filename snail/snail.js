@@ -509,11 +509,24 @@ function renderSearchResults(items, list, input) {
     return;
   }
 
-  // Initial render: instant. Rank starts as either a cached value
-  // from a loaded chunk (or a previous /ranks/rank call) or "—". The
-  // dropdown appears immediately, then fillSearchRanks fires below
-  // to fetch any unknowns in the background and patch the chips in
-  // place.
+  // Seed rankByID from the /search response. As of the snapshot-piggy-
+  // back optimization, the backend inlines `rank` for dead results
+  // when the per-PoP snapshot is warm — so the typical search (popular
+  // username, all dead) gets every rank up-front and fillSearchRanks
+  // below has nothing to fetch. Alive results, and dead results not
+  // yet in the snapshot, still arrive without `rank` and fall through
+  // to fillSearchRanks like before.
+  for (const p of items) {
+    if (p && p.steamID && typeof p.rank === "number") {
+      state.rankByID.set(p.steamID, p.rank);
+    }
+  }
+
+  // Initial render: instant. Rank starts as either the value just
+  // seeded from the /search response (snapshot-warm common case), a
+  // value cached from a loaded chunk / previous /ranks-or-/rank call,
+  // or "—". The dropdown appears immediately; fillSearchRanks below
+  // patches any chips still showing "—" once /ranks resolves them.
   items.forEach((p) => {
     const li = document.createElement("li");
     li.className = "lb-result-item";
@@ -580,8 +593,13 @@ async function fillSearchRanks(items, list) {
 
   let ranks;
   try {
+    // Sort steamIds before joining: the edge cache key is the raw URL,
+    // so [B,A,C] and [A,B,C] would otherwise miss separately even
+    // though the backend's IN-query returns the same result set.
+    // Sorting in-place is fine — `missing` is a local array.
+    const sortedIds = [...missing].sort();
     const res = await fetch(
-      `${RANKS_URL}?steamIds=${missing.map(encodeURIComponent).join(",")}`,
+      `${RANKS_URL}?steamIds=${sortedIds.map(encodeURIComponent).join(",")}`,
     );
     if (!res.ok) return;
     ranks = await res.json();
@@ -650,7 +668,14 @@ function setupSearch() {
     debounceTimer = setTimeout(async () => {
       const myToken = (inFlightToken = Symbol("search"));
       try {
-        const res = await fetch(`${SEARCH_URL}?q=${encodeURIComponent(q)}`);
+        // Lowercase the query before sending: the backend does
+        // `WHERE LOWER(username) LIKE LOWER(?)` so casing makes no
+        // difference to results, but the edge cache key is the raw
+        // URL — "Luca" and "luca" would otherwise miss separately.
+        // Normalizing here collapses them to one cache entry.
+        const res = await fetch(
+          `${SEARCH_URL}?q=${encodeURIComponent(q.toLowerCase())}`,
+        );
         if (inFlightToken !== myToken) return; // stale
         if (!res.ok) {
           list.hidden = true;
