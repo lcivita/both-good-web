@@ -121,6 +121,22 @@ function formatBotScore(seconds) {
   return remD === 0 ? `≈${y}y` : `≈${y}y ${remD}d`;
 }
 
+// Death-time shown on hover in the cemetery score cell.
+// Fixed `MM/DD/YY HH:mm` (24-hour, US date order), rendered in the
+// viewer's LOCAL timezone — so "12:52" means 12:52 on the clock of
+// whoever is looking, not UTC. Non-numeric input returns "" (callers
+// gate on truthy).
+function formatDeath(unixSec) {
+  if (typeof unixSec !== "number" || !Number.isFinite(unixSec)) return "";
+  const d = new Date(unixSec * 1000);
+  const mm = pad2(d.getMonth() + 1);
+  const dd = pad2(d.getDate());
+  const yy = pad2(d.getFullYear() % 100);
+  const hh = pad2(d.getHours());
+  const mi = pad2(d.getMinutes());
+  return `${mm}/${dd}/${yy} ${hh}:${mi}`;
+}
+
 // Renders the rows for one page of one side. `entries` is a sparse
 // array indexed by rank-1; only filled slots in [start, end) get drawn.
 // If a slot is empty the row is just skipped (the caller should have
@@ -181,9 +197,28 @@ function renderPage({
     nameCell.appendChild(nameSpan);
 
     const scoreCell = document.createElement("td");
-    scoreCell.textContent = formatScore
+    const scoreText = formatScore
       ? formatScore(entry.score ?? 0, entry)
       : String(entry.score ?? 0);
+
+    // Cemetery rows: score on default, death date on :hover. Two spans
+    // toggled via CSS (.lb-score-cell rules in style.css). The hover
+    // text degrades cleanly when the backend hasn't deployed yet —
+    // entry.updatedAt is missing for ~60s of cached payloads after
+    // backend deploy and we just render plain score in that window.
+    if (isDead && typeof entry.updatedAt === "number") {
+      scoreCell.classList.add("lb-score-cell");
+      const defaultSpan = document.createElement("span");
+      defaultSpan.className = "lb-score-default";
+      defaultSpan.textContent = scoreText;
+      const hoverSpan = document.createElement("span");
+      hoverSpan.className = "lb-score-hover";
+      hoverSpan.textContent = `${EMOJI_DEAD} ${formatDeath(entry.updatedAt)}`;
+      scoreCell.appendChild(defaultSpan);
+      scoreCell.appendChild(hoverSpan);
+    } else {
+      scoreCell.textContent = scoreText;
+    }
 
     tr.appendChild(rankCell);
     tr.appendChild(nameCell);

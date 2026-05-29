@@ -216,9 +216,26 @@ table {
 /* Score column */
 #leaderboard th:nth-child(3),
 #leaderboard td:nth-child(3) {
-  width: 150px;
+  width: 200px; /* wide enough to fit the locale-formatted death date */
   white-space: nowrap;
   text-align: left;
+}
+
+/* Cemetery score cell: shows score by default, swaps to death date when
+   the user hovers ANYWHERE on the row (snail.js renderPage builds the
+   two spans only for dead rows with a numeric updatedAt — so this rule
+   no-ops harmlessly on living rows that don't have .lb-score-cell).
+   Scoped to #leaderboard tbody so other tables aren't affected.
+   Mobile/touch fires :hover sticky on tap; acceptable since the row has
+   no click action that could conflict. */
+.lb-score-cell .lb-score-hover {
+  display: none;
+}
+#leaderboard tbody tr:hover .lb-score-cell .lb-score-default {
+  display: none;
+}
+#leaderboard tbody tr:hover .lb-score-cell .lb-score-hover {
+  display: inline;
 }
 
 /* Player column (flexible remaining space) */
