@@ -132,6 +132,20 @@ p {
   border-bottom: none;
 }
 
+.discord-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.discord-link img {
+  height: 1em;
+  width: 1em;
+}
+
+.center {
+    text-align: center;
+}
 .tab {
   background: #000080;
   color: #ffffff;
