@@ -310,10 +310,18 @@ function setActiveTab(active) {
 
 // Jump straight to the page a searched player is on, switching tabs
 // (Cemetery vs Living) as needed, and highlight their row. Rank
-// resolution prefers (1) the value embedded in the /search payload —
-// the common path, no extra round-trip; (2) state.rankByID if the
-// player is already visible in a loaded chunk; (3) /rank as a last
-// resort for callers that synthesize their own `p` without rank.
+// resolution prefers, in order:
+//   (1) state.rankByID — the canonical row position learned from a
+//       /leaderboard chunk fetch. Always wins when present because
+//       chunk row positions come from a fresh `ORDER BY score DESC`
+//       scan, while /search's inline rank can lag by up to the
+//       snapshot's hard TTL (~600s) and put us on the wrong page.
+//   (2) p.rank — inline rank from the /search payload. Used only for
+//       players not yet in a loaded chunk. May be stale by ~1 page
+//       in the worst case; acceptable since we don't have a fresher
+//       source for unloaded players.
+//   (3) /rank — last-resort COUNT(*) fallback for callers that
+//       synthesize their own `p` without rank.
 async function goToPlayer(p) {
   if (!p || !p.steamID) return;
 
@@ -321,7 +329,7 @@ async function goToPlayer(p) {
   state.active = target;
   applyTabUI(target);
 
-  let rank = p.rank ?? state.rankByID.get(p.steamID);
+  let rank = state.rankByID.get(p.steamID) ?? p.rank;
 
   if (!rank) {
     try {
@@ -544,15 +552,31 @@ function renderSearchResults(items, list, input) {
     return;
   }
 
-  // Seed rankByID from the /search response. As of the snapshot-piggy-
-  // back optimization, the backend inlines `rank` for dead results
-  // when the per-PoP snapshot is warm — so the typical search (popular
-  // username, all dead) gets every rank up-front and fillSearchRanks
-  // below has nothing to fetch. Alive results, and dead results not
-  // yet in the snapshot, still arrive without `rank` and fall through
-  // to fillSearchRanks like before.
+  // Seed rankByID from the /search response. The backend inlines `rank`
+  // for dead results when the per-PoP snapshot is warm — so the typical
+  // search (popular username, all dead) gets every rank up-front and
+  // fillSearchRanks below has nothing to fetch. Alive results, and dead
+  // results not yet in the snapshot, arrive without `rank` and fall
+  // through to fillSearchRanks.
+  //
+  // NEVER overwrite an existing rankByID entry, though: chunk fetches
+  // populate it with the canonical row position from a fresh DB scan
+  // (idx_dead_board, ORDER BY score DESC), and that's authoritative
+  // for any player visible on the leaderboard. The snapshot's `rank`
+  // can lag canonical by ~600s (its hard TTL) — long enough for a new
+  // high-score death to land while the snapshot still reflects pre-
+  // death rankings. Overwriting the chunk-derived row position with
+  // a stale snapshot rank made the search chip render the wrong
+  // number AND made goToPlayer's page calc target the wrong page.
+  // Keeping chunk-derived values means search ranks self-correct as
+  // soon as the user's view of the leaderboard catches up.
   for (const p of items) {
-    if (p && p.steamID && typeof p.rank === "number") {
+    if (
+      p &&
+      p.steamID &&
+      typeof p.rank === "number" &&
+      !state.rankByID.has(p.steamID)
+    ) {
       state.rankByID.set(p.steamID, p.rank);
     }
   }
@@ -644,9 +668,18 @@ async function fillSearchRanks(items, list) {
   }
   if (!Array.isArray(ranks)) return;
 
-  // Stash so subsequent searches / clicks are free.
+  // Stash so subsequent searches / clicks are free. Same has() guard as
+  // the /search seeding loop: between computing `missing` above and the
+  // /ranks response arriving, a chunk fetch could have populated the
+  // canonical row position for some of these ids — and that's strictly
+  // more accurate than the snapshot-derived rank /ranks returns.
   for (const r of ranks) {
-    if (r && r.steamID && typeof r.rank === "number") {
+    if (
+      r &&
+      r.steamID &&
+      typeof r.rank === "number" &&
+      !state.rankByID.has(r.steamID)
+    ) {
       state.rankByID.set(r.steamID, r.rank);
     }
   }
